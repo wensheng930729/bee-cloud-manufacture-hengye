@@ -1,0 +1,28 @@
+@import '~@/utils/utils.less';
+
+.title {
+  line-height: @lineHeight-lg+20;
+  font-weight: bold;
+  font-size: @heading-4-size;
+  position: relative;
+  padding-left: @padding-sm ;
+
+  &::after {
+    content: ' ';
+    position: absolute;
+    background-color: @warning-color;
+    height: @heading-4-size;
+    width: 3px;
+    left: 0px;
+    top: 16px;
+  }
+}
+
+.content {
+  line-height: @lineHeight-lg;
+  padding: @padding-sm ;
+}
+
+.red{
+  color:@error-color
+}

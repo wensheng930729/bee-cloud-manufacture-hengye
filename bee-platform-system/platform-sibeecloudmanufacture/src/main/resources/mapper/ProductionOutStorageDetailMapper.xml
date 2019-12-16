@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProductionOutStorageDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProductionOutStorageDetail">
+        <id column="id" property="id" />
+        <result column="storage_id" property="storageId" />
+        <result column="storage_name" property="storageName" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_number" property="productNumber" />
+        <result column="product_unit" property="productUnit" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="reason" property="reason" />
+        <result column="out_storage_time" property="outStorageTime" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, storage_id, storage_name,
+        product_id, product_name,
+        product_number, product_unit,
+        product_spec_id, product_spec_name,
+        reason, out_storage_time, status,
+        create_id, creator
+    </sql>
+
+
+    <select id="getTodayUsed" parameterType="map" resultType="decimal">
+          SELECT SUM(a.product_number)
+          FROM production_out_storage_detail a
+          WHERE a.out_storage_time LIKE CONCAT('%',#{dayTime},'%')
+          AND a.status =1
+          GROUP BY product_id,product_spec_id
+          HAVING product_id = #{productId} and product_spec_id = #{productSpecId}
+    </select>
+
+    <select id="getTodayUsedAfter" parameterType="map" resultType="decimal">
+          SELECT SUM(a.product_number)
+          FROM production_out_storage_detail a
+          WHERE
+          <![CDATA[ DATE_FORMAT( a.out_storage_time , '%Y-%m-%d') >  DATE_FORMAT(#{dayTime}, '%Y-%m-%d')]]>
+          AND a.status =1
+          GROUP BY product_id,product_spec_id
+          HAVING product_id = #{productId} and product_spec_id = #{productSpecId}
+    </select>
+</mapper>

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.SaleSampleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.SaleSample">
+        <id column="id" property="id"/>
+        <result column="enterprise_id" property="enterpriseId"/>
+        <result column="factory_id" property="factoryId"/>
+        <result column="contract_business_id" property="contractBusinessId"/>
+        <result column="contract_num" property="contractNum"/>
+        <result column="sample_code" property="sampleCode"/>
+        <result column="product_id" property="productId"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_spec_id" property="productSpecId"/>
+        <result column="product_spec_name" property="productSpecName"/>
+        <result column="assay_status" property="assayStatus"/>
+        <result column="assay_id" property="assayId"/>
+        <result column="assay_person" property="assayPerson"/>
+        <result column="assay_time" property="assayTime"/>
+        <result column="abandon_reason" property="abandonReason"/>
+        <result column="abandon_id" property="abandonId"/>
+        <result column="abandon_person" property="abandonPerson"/>
+        <result column="abandon_time" property="abandonTime"/>
+        <result column="status" property="status"/>
+        <result column="create_id" property="createId"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_id" property="modifyId"/>
+        <result column="modifier" property="modifier"/>
+        <result column="modify_time" property="modifyTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, factory_id, contract_business_id,contract_num, sample_code, product_id, product_name,product_spec_id,product_spec_name,assay_status, assay_id, assay_person, assay_time, abandon_reason, abandon_id, abandon_person, abandon_time, status, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+    <select id="getSamplePrepareList" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SamplePrepareDTO">
+        SELECT
+        1 AS businessType,
+        a.sample_push_time AS samplePushTime,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.machine_id AS machineId,
+        a.train_number AS trainNumber,
+        a.weighing_time AS weightCompleteTime,
+        a.contract_business_id AS contractBusinessId,
+        NULL AS contractNum,
+        NULL AS proOreFurnaceSampleId,
+        NULL AS furnaceId,
+        NULL AS furnaceName,
+        NULL AS shift,
+        NULL AS furnaceBatch,
+        NULL AS openTime
+        FROM
+        buy_weight_machine a
+        WHERE 1 = 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.sample_status = 0
+        AND a.sample_push_status = 1
+        AND a.`status` = 1
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        2 AS businessType,
+        a.create_time AS samplePushTime,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        NULL AS machineId,
+        NULL AS trainNumber,
+        NULL AS weightCompleteTime,
+        a.contract_business_id AS contractBusinessId,
+        a.contract_num AS contractNum,
+        NULL AS proOreFurnaceSampleId,
+        NULL AS furnaceId,
+        NULL AS furnaceName,
+        NULL AS shift,
+        NULL AS furnaceBatch,
+        NULL AS openTime
+        FROM
+        sale_contract_basic a
+        WHERE 1 = 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.sample_status = 0
+        AND a.`status` = 1
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        3 AS businessType,
+        a.create_time AS samplePushTime,
+        NULL AS productId,
+        NULL AS productName,
+        NULL AS machineId,
+        NULL AS trainNumber,
+        NULL AS weightCompleteTime,
+        NULL AS contractBusinessId,
+        NULL AS contractNum,
+        a.id AS proOreFurnaceSampleId,
+        a.furnace_id AS furnaceId,
+        b.name AS furnaceName,
+        a.shift AS shift,
+        a.furnace_batch AS furnaceBatch,
+        a.open_time AS openTime
+        FROM
+        pro_ore_furnace_sample a
+        LEFT JOIN config_device b ON a.furnace_id = b.id AND b.enterprise_id =#{enterpriseId}
+        <if test="factoryId!=null">
+            AND b.factory_id = #{factoryId}
+        </if>
+        WHERE 1=1
+        AND a.company_id = #{enterpriseId}
+        AND a.sample_status = 0
+        AND a.`status` = 1
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        ORDER BY samplePushTime DESC
+    </select>
+
+    <select id="getSampleAlreadyList" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SampleAlreadyDTO">
+        SELECT
+        1 AS businessType,
+        a.sample_code AS sampleCode,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.create_time AS sampleTime,
+        a.creator AS samplePerson,
+        c.train_number AS trainNumber,
+        c.machine_id AS machineId,
+        NULL AS contractBusinessId,
+        NULL AS contractNum,
+        NULL AS furnaceId,
+        NULL AS furnaceName,
+        NULL AS shift,
+        NULL AS furnaceBatch
+        FROM buy_sample a
+        LEFT JOIN buy_sample_weight_relation b ON a.sample_code = b.sample_code
+        AND b.`status` = 1
+        LEFT JOIN buy_weight_machine c ON c.machine_id = b.machine_id
+        AND c.`status` = 1
+        WHERE 1 = 1
+        AND a.`status` = 1
+        AND a.enterprise_id = #{enterpriseId}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        2 AS businessType,
+        a.sample_code AS sampleCode,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.create_time AS sampleTime,
+        a.creator AS samplePerson,
+        NULL AS trainNumber,
+        NULL AS machineId,
+        b.contract_business_id AS contractBusinessId,
+        b.contract_num AS contractNum,
+        NULL AS furnaceId,
+        NULL AS furnaceName,
+        NULL AS shift,
+        NULL AS furnaceBatch
+        FROM sale_sample a
+        LEFT JOIN sale_contract_basic b ON b.contract_business_id = a.contract_business_id
+        AND b.`status` = 1
+        WHERE 1 = 1
+        AND a.`status` = 1
+        AND a.enterprise_id = #{enterpriseId}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        3 AS businessType,
+        a.sample_code AS sampleCode,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.create_time AS sampleTime,
+        a.creator AS samplePerson,
+        NULL AS trainNumber,
+        NULL AS machineId,
+        NULL AS contractBusinessId,
+        NULL AS contractNum,
+        a.furnace_id AS furnaceId,
+        a.furnace_name AS furnaceName,
+        a.shift AS shift,
+        a.furnace_batch AS furnaceBatch
+        FROM pro_sample a
+        WHERE 1= 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.`status`=1
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        ORDER BY sampleTime DESC
+    </select>
+
+
+    <select id="getTonCodeContractBusinessIdRelation" parameterType="list"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.TonContractRelationDTO">
+        SELECT
+        a.ton_bag_number AS tonCode,
+        c.contract_business_id AS contractBusinessId
+        FROM
+        finished_product_out_storage_detail a
+        LEFT JOIN finished_product_be_out_of_storage b ON b.contract_car_id = a.contract_car_id
+        LEFT JOIN sale_contract_basic c ON c.contract_num = b.contract_id
+        WHERE
+        a.ton_bag_number IN
+        <foreach collection="list" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getSampleSaleByTonCode" parameterType="list"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SampleSaleAddContractBusinessIdDTO">
+        SELECT
+        b.id AS id,
+        b.sample_code AS sampleCode,
+        b.contract_business_id AS contractBusinessId,
+        a.ton_code AS tonCode
+        FROM
+        sale_sample_ton_relation a LEFT JOIN sale_sample b ON a.sample_code = b.sample_code
+        WHERE 1=1
+        AND a.`status` = 1
+        AND a.ton_code IN
+        <foreach collection="list" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>

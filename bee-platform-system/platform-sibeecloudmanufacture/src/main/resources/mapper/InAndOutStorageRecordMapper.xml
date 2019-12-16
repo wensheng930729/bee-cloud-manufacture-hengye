@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.InAndOutStorageRecordMapper">
+
+
+    <select id="selectBuyInStorageRecord"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.BuyInStorageRecordDTO">
+        SELECT ps.contract_id,ps.storage_name,ps.storage_id,SUM(ps.actual_product_number) product_number
+        ,CONCAT(DATE_FORMAT(MIN(ps.storage_time),'%Y-%m-%d'),' 至 ',DATE_FORMAT(MAX(ps.storage_time),'%Y-%m-%d')) `time`
+        FROM buy_product_pending_storage ps
+        WHERE
+        ps.put_storage = 1 AND ps.factory_id = #{factoryId} AND ps.org_id = #{orgId}
+        GROUP BY ps.contract_id,ps.storage_id
+    </select>
+    <select id="selectFreeInStorageRecord"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.FreeInStorageRecordDTO">
+        SELECT product_name,storage_name,DATE_FORMAT(storage_time,'%Y-%m-%d') time,product_number,product_spec_name
+        FROM free_storage_detail
+        WHERE
+        factory_id = #{factoryId} AND org_id = #{orgId}
+    </select>
+    <select id="selectFreeInStorageRecordWithPage"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.FreeInStorageRecordDTO">
+        SELECT product_name,storage_name,DATE_FORMAT(storage_time,'%Y-%m-%d') time,product_number,product_spec_name
+        FROM free_storage_detail
+        WHERE
+        factory_id = #{factoryId} AND org_id = #{orgId}
+        order by storage_time desc
+    </select>
+    
+    <select id="selectFinishProductInStorageRecord"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.FinishProductInStorageRecordDTO">
+        SELECT ps.furnace_number,ps.furnace_times,ps.scheduling,ps.storage_id,r.`name` storage_name,ps.product_name
+        ,SUM(ps.product_number) product_number,DATE_FORMAT(ps.storage_time,'%Y-%m-%d') `time`,ps.product_spec_id,ps.product_spec_name
+        FROM finished_product_pending_storage ps
+        LEFT JOIN config_repository r ON r.id = ps.storage_id
+        WHERE ps.put_storage = 1 AND ps.factory_id = #{factoryId} AND ps.org_id = #{orgId}
+        GROUP BY ps.furnace_number,ps.furnace_times,ps.scheduling,ps.storage_id,DATE_FORMAT(ps.storage_time,'%Y-%m-%d')
+    </select>
+    <select id="selectSaleOutStorageRecord"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SaleOutStorageRecordDTO">
+        SELECT bs.contract_id,ps.storage_id,bs.product_name,r.`name` storage_name,COUNT(sd.contract_car_id) ton_bag_quantity
+        ,cb.customer_name purchaser,SUM(sd.product_number) total_quantity
+        ,bs.modifier operator,CONCAT(DATE_FORMAT(MIN(sd.out_storage_time),'%Y-%m-%d'),' 至 ',DATE_FORMAT(MAX(sd.out_storage_time),'%Y-%m-%d')) `time`
+         FROM finished_product_be_out_of_storage bs
+        INNER JOIN finished_product_out_storage_detail sd ON bs.contract_car_id = sd.contract_car_id
+        INNER JOIN finished_product_pending_storage ps ON sd.ton_bag_number = ps.ton_bag_number
+        INNER JOIN sale_contract_basic cb ON cb.contract_num = bs.contract_id
+        INNER JOIN config_repository r ON r.id = ps.storage_id
+        WHERE
+        bs.out_storage = 1 AND bs.factory_id = #{factoryId} AND bs.org_id = #{orgId}
+        GROUP BY bs.contract_id,ps.storage_id ORDER BY sd.out_storage_time DESC
+    </select>
+
+    <select id="selectPickOutStorage" resultType="com.bee.platform.cloud.si.manufacture.dto.PickOutStorageDTO">
+        SELECT d.receiver,d.product_id,p.`name` product_name,d.storage_name,d.product_number,d.receive_time out_storage_time,d.product_spec_name
+        FROM pick_out_storage_detail d
+        LEFT JOIN config_product p ON p.id = d.product_id
+        WHERE
+        d.factory_id = #{factoryId} AND d.org_id = #{orgId}
+    </select>
+
+    <select id="selectProductionOutStorage"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProductionOutStorageDTO">
+        SELECT product_name,product_number,product_unit,storage_name,creator out_storage_person,reason
+          ,DATE_FORMAT(out_storage_time,'%Y-%m-%d') out_storage_time,product_spec_name
+        FROM production_out_storage_detail
+        WHERE
+        factory_id = #{factoryId} AND org_id = #{orgId}
+    </select>
+
+    <select id="selectSaleFreeOutStorageRecord"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SaleOutStorageRecordDTO">
+        SELECT os.contract_id,fo.storage_id,fo.storage_name,cb.customer_name purchaser
+        ,SUM(fo.product_number) total_quantity,fo.creator operator,fo.product_name,0 AS ton_bag_quantity
+        ,CONCAT(DATE_FORMAT(MIN(os.create_time),'%Y-%m-%d'),' 至 ',DATE_FORMAT(MAX(os.create_time),'%Y-%m-%d')) `time`
+        FROM finished_product_be_out_of_storage os
+        INNER JOIN sale_contract_basic cb ON cb.contract_num = os.contract_id
+        INNER JOIN finished_product_free_out fo ON os.contract_car_id =  fo.contract_car_id
+        WHERE
+        os.out_storage = 1 AND os.factory_id = #{factoryId} AND os.org_id = #{orgId}
+        GROUP BY os.contract_id,fo.storage_id ORDER BY cb.create_time DESC
+    </select>
+</mapper>

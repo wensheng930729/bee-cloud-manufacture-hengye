@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.WeightMachineDataMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.WeightMachineData">
+        <id column="id" property="id" />
+        <result column="device_id" property="deviceId" />
+        <result column="weight_data" property="weightData" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, device_id, weight_data, create_time
+    </sql>
+
+    <select id="getReverseOneResult" parameterType="string" resultMap="BaseResultMap">
+          SELECT * FROM weight_machine_data  a
+          where a.device_id = #{deviceId}
+          ORDER BY a.create_time DESC LIMIT 1
+    </select>
+</mapper>

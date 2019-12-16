@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.BuyCarrierTransportDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.BuyCarrierTransportDetail">
+        <id column="id" property="id" />
+        <result column="batch_id" property="batchId" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="transport_section_id" property="transportSectionId" />
+        <result column="carrier_transport_id" property="carrierTransportId" />
+        <result column="transport_mode" property="transportMode" />
+        <result column="train_number" property="trainNumber" />
+        <result column="driver" property="driver" />
+        <result column="contact" property="contact" />
+        <result column="cargo_weight" property="cargoWeight" />
+        <result column="arrival_status" property="arrivalStatus" />
+        <result column="machine_id" property="machineId" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, batch_id, contract_business_id, transport_section_id, carrier_transport_id, transport_mode, train_number,
+        driver, contact, cargo_weight, arrival_status, machine_id, status, create_id, creator, create_time, modify_id,
+        modifier, modify_time, remark
+    </sql>
+
+    <!-- 查询批次中到厂的车辆信息 -->
+    <select id="getToFactoryCarInfo" resultMap="BaseResultMap">
+        select d.* from buy_carrier_transport ct inner join buy_carrier_transport_detail d
+          on ct.carrier_transport_id = d.carrier_transport_id
+        where ct.to_factory = '1' and d.transport_mode = '1' and ct.status = '1' and d.status = '1'
+          and ct.contract_business_id = #{contractBusinessId} and ct.batch_id = #{batchId}
+    </select>
+
+    <!-- 查询批次中到厂的车辆信息 -->
+    <select id="selectVolumeByTransportSection" resultType="java.math.BigDecimal">
+        select sum(ifnull(t.cargo_weight, 0)) from buy_carrier_transport_detail t
+        where t.transport_section_id = #{transportSectionId} and t.status = '1'
+    </select>
+
+</mapper>

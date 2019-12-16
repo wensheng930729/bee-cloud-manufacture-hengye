@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProIngredientStatisticMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProIngredientStatistic">
+        <id column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="batch_id" property="batchId" />
+        <result column="material_name" property="materialName" />
+        <result column="plc_id" property="plcId" />
+        <result column="plc_name" property="plcName" />
+        <result column="unit" property="unit" />
+        <result column="num" property="num" />
+        <result column="warehouse_id" property="warehouseId" />
+        <result column="warehouse_name" property="warehouseName" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, product_id, product_name, product_spec_id, product_spec_name, batch_id, material_name, plc_id, plc_name, unit, num, warehouse_id, warehouse_name, create_time, modify_time, status
+    </sql>
+
+    <update id="updateBlankingByData">
+         update pro_ingredient_statistic set num=IFNULL(num,0)+#{dto.num} where status=1
+         and batch_id=#{batchId}
+         and product_id=#{dto.productId}
+         and product_spec_id=#{dto.productSpecId}
+    </update>
+</mapper>

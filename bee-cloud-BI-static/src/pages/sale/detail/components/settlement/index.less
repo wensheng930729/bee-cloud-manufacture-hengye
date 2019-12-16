@@ -1,0 +1,33 @@
+@import '~@/utils/configs.less';
+
+.container {
+  background-color: @component-background;
+
+  .actions {
+    span {
+      padding: 0 10px;
+      cursor: pointer;
+      color: #1890ff;
+    }
+  }
+
+  :global {
+    .ant-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 280px;
+      background-color: #FFFFFF;
+    }
+
+    .ant-table-thead>tr>th {
+      background: #ececec;
+    }
+
+    .ant-table-thead th,
+    td {
+      text-align: center;
+    }
+  }
+}

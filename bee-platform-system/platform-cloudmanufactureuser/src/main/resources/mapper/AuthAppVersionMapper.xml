@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.user.dao.mapper.AuthAppVersionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.user.entity.AuthAppVersion">
+        <id column="id" property="id" />
+        <result column="app_type" property="appType" />
+        <result column="download_addr" property="downloadAddr" />
+        <result column="latest_version" property="latestVersion" />
+        <result column="spare_addr" property="spareAddr" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, app_type, download_addr, latest_version, spare_addr
+    </sql>
+
+</mapper>

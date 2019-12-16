@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.FinishedProductPendingStorageMapper">
+
+    <select id="selectNoSpecProduct" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(product_number),0.00) product_number FROM finished_product_pending_storage
+        WHERE
+        factory_id = #{factoryId} AND org_id = #{orgId} AND put_storage = 1 AND `status` = 1 AND product_spec_id IS NULL
+    </select>
+
+
+	<select id="selectFinishedStorageByConditional" parameterType="map" resultType="com.bee.platform.cloud.si.manufacture.dto.FinishedProductPendingStorageListDTO">
+		SELECT
+		fpps.finished_product_pending_storage_id AS finishedProductPendingStorageId,
+		fpps.ton_bag_number AS tonBagNumber,
+		fpps.product_number AS productNumber,
+		fpps.product_id AS productId,
+		fpps.product_name AS productName,
+		fpps.product_unit AS productUnit,
+		fpps.product_spec_id AS productSpecId,
+		fpps.product_spec_name AS productSpecName,
+		fpps.furnace_number AS furnaceNumber,
+		fpps.furnace_times AS furnaceTimes,
+		fpps.scheduling AS scheduling,
+		pb.shift_time AS shiftTime,
+		fpps.storage_time AS storageTime
+	FROM
+		finished_product_pending_storage fpps,
+		pro_bagging pb
+	WHERE
+		fpps.ton_bag_number = pb.bagging_code
+		and fpps.status = 1
+		and pb.status = 1
+         <if test="orgId!=null">
+             AND fpps.org_id = #{orgId}
+         </if>
+         <if test="factoryId!=null">
+             AND fpps.factory_id = #{factoryId}
+         </if>
+        <if test="startTime!=null">
+             AND pb.shift_time <![CDATA[>= ]]> #{startTime}
+         </if>
+         <if test="endTime!=null">
+             AND pb.shift_time <![CDATA[<= ]]> #{endTime}
+         </if>
+         <if test="putStorage!=null">
+             AND fpps.put_storage = #{putStorage}
+         </if>
+         <if test="furnaceNumber!=null">
+             AND fpps.furnace_number = #{furnaceNumber}
+         </if>
+         <if test="scheduling!=null">
+             AND fpps.scheduling = #{scheduling}
+         </if>
+         <if test="tonBagNumber!=null">
+             AND fpps.ton_bag_number LIKE CONCAT('%',#{tonBagNumber},'%')
+         </if>
+         order by pb.shift_time desc
+	</select>
+</mapper>

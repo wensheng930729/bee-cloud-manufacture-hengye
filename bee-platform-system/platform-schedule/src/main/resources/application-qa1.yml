@@ -1,0 +1,57 @@
+spring:
+    profiles: qa1    #环境标识
+    application: 
+        name: platform-schedule
+xxl:
+  job:
+    admin:
+      addresses: http://192.168.3.194:9922    # xxl-job-admin管控台的访问地址
+    executor:
+      appname: platform-schedule   #应用名称
+      ip:
+      port: 9901
+      logpath: applogs/platform-schedule/jobhandler    #任务执行产生的日志存放的路径
+      logretentiondays: -1    # xxl-job log retention days
+    accessToken:     # xxl-job, access token
+    
+# log config
+logging:
+  config: classpath:logback-spring.xml
+
+###注意：springcloud feign 请求超时处理：高版本的springcloud-openfeign请求分为两层，先ribbon控制，后hystrix控制，hystrix默认处于关闭状态###
+#ribbon的超时时间配置
+ribbon:
+  ConnectTimeout: 8000    #ribbon的请求连接的超时时间
+  ReadTimeout: 60000    #ribbon的请求处理的超时时间 
+
+#打开feign-hystrix
+feign:
+  hystrix:
+    enabled: true
+  client: 
+    config:
+      default:
+        connectTimeout: 8000    #feign的请求连接的超时时间，修改配置为8s
+        readTimeout: 10000    #feign的请求处理的超时时间，修改配置为10s
+        
+#hystrix 超时时间配置
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true    #如果enabled设置为false，则请求超时交给ribbon控制
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000    #熔断器hystrix默认的超时时间是1s，所有是远远不够的，修改配置为10s
+            
+#网关地址
+api-gateway:
+  remote-addr: http://127.0.0.1:9900
+
+#模块地址
+platform-business:
+  remote-addr: http://127.0.0.1:8700
+
+platform-user:
+  remote-addr: http://127.0.0.1:8800

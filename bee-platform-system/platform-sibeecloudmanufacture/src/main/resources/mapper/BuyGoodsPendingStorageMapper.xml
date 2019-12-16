@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.BuyGoodsPendingStorageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.BuyGoodsPendingStorage">
+        <id column="id" property="id" />
+        <result column="buy_product_pending_storage_id" property="buyProductPendingStorageId" />
+        <result column="machine_id" property="machineId" />
+        <result column="contract_id" property="contractId" />
+        <result column="license_plate_number" property="licensePlateNumber" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_number" property="productNumber" />
+        <result column="product_unit" property="productUnit" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="arrival_time" property="arrivalTime" />
+        <result column="analysis_result" property="analysisResult" />
+        <result column="process_mode" property="processMode" />
+        <result column="storage_time" property="storageTime" />
+        <result column="put_storage" property="putStorage" />
+        <result column="storage_id" property="storageId" />
+        <result column="storage_name" property="storageName" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, buy_product_pending_storage_id, machine_id,
+        contract_id, license_plate_number, product_id,
+        product_name, product_number, product_unit,
+        product_spec_id, product_spec_name, arrival_time,
+        analysis_result, process_mode, storage_time,
+        put_storage, storage_id, storage_name, status,
+        create_id, creator, create_time, modify_id,
+        modifier, modify_time
+    </sql>
+
+    <select id="getTodayIntoStock" parameterType="map" resultType="decimal">
+          SELECT SUM(a.product_number)
+          FROM buy_product_pending_storage a
+          WHERE a.storage_time LIKE CONCAT('%',#{dayTime},'%')
+          AND a.status =1
+          AND a.put_storage = 1
+          GROUP BY product_id,product_spec_id
+          HAVING product_id = #{productId} and product_spec_id = #{productSpecId}
+    </select>
+
+    <select id="getTodayIntoStockAfter" parameterType="map" resultType="decimal">
+          SELECT SUM(a.product_number)
+          FROM buy_product_pending_storage a
+          WHERE
+          <![CDATA[ DATE_FORMAT( a.storage_time , '%Y-%m-%d') >  DATE_FORMAT(#{dayTime}, '%Y-%m-%d')]]>
+          AND a.status =1
+          AND a.put_storage = 1
+          GROUP BY product_id,product_spec_id
+          HAVING product_id = #{productId} and product_spec_id = #{productSpecId}
+    </select>
+
+</mapper>

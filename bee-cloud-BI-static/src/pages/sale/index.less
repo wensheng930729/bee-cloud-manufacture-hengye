@@ -1,0 +1,39 @@
+@import '~@/utils/configs.less';
+.container {
+  margin: 24px 32px;
+  overflow: hidden;
+  :global {
+    .ant-row {
+      display: flex;
+      justify-content: space-around;
+      padding: 30px;
+
+      & > div {
+        flex: 1;
+        text-align: center;
+      }
+    }
+
+    .ant-card-body {
+      background-color: #fff;
+
+      .ant-card-body {
+        background-color: #ececec;
+      }
+    }
+
+    .ant-tabs-nav {
+      width: 100%;
+
+      & > div:nth-child(1) {
+        display: flex;
+        justify-content: space-between;
+
+        .ant-tabs-tab {
+          flex: 1;
+          text-align: center;
+        }
+      }
+    }
+  }
+}

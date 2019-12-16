@@ -1,0 +1,49 @@
+@import '~@/utils/configs.less';
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  line-height: @lineHeight-lg;
+
+  span {
+    width: 33%;
+  }
+}
+
+.cardTable {
+  margin-top: @padding-sm
+}
+
+.result {
+  line-height: @lineHeight-lg;
+
+  section {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid @border-color-base;
+    }
+
+    span {
+      width: 50%;
+
+      &:last-child {
+        width: 100%;
+      }
+
+      ul {
+        padding-left: 4rem;
+        display: flex;
+        flex-wrap: wrap;
+
+        li {
+          padding: 0 @padding-sm;
+          list-style-type: none;
+        }
+      }
+    }
+  }
+}

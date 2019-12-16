@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.user.dao.mapper.AuthPlatformUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.user.entity.AuthPlatformUser">
+        <id column="id" property="id" />
+        <result column="phone" property="phone" />
+        <result column="name" property="name" />
+        <result column="username" property="username" />
+        <result column="nickname" property="nickname" />
+        <result column="password" property="password" />
+        <result column="head" property="head" />
+        <result column="email" property="email" />
+        <result column="qq" property="qq" />
+        <result column="region_id" property="regionId" />
+        <result column="address" property="address" />
+        <result column="fixtel" property="fixtel" />
+        <result column="sys_token" property="sysToken" />
+        <result column="expires_in" property="expiresIn" />
+        <result column="current_enterprise_id" property="currentEnterpriseId" />
+        <result column="status" property="status" />
+        <result column="active_type" property="activeType" />
+        <result column="user_type" property="userType" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="update_user" property="updateUser" />
+        <result column="deleted" property="deleted" />
+        <result column="account_description" property="accountDescription" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, phone, `name`,  username, nickname, password, head, email, qq,
+        region_id, address, fixtel,sys_token,expires_in,current_enterprise_id, status, active_type,user_type,create_time, update_time,
+           update_user, deleted,account_description
+    </sql>
+
+    <select id="selectUserByKeyword" resultType="com.bee.platform.cloud.user.dto.UserDetailedDTO">
+        select au.id as userId ,au.`name`,au.username,au.status as state,au.create_time as createTime,ar.role_id as roleId from  auth_platform_user  au
+        inner join auth_user_role ar on au.id=ar.user_id
+        where  au.deleted=0
+        <if test="enterpriseId!=null">
+            and ar.enterprise_id=#{enterpriseId}
+        </if>
+        <if test="keyword!=null and keyword!=''">
+            and ( au.`name` like CONCAT('%',#{keyword},'%') or username like  CONCAT('%',#{keyword},'%'))
+        </if>
+        <if test="roleId!=null">
+            and ar.role_id=#{roleId}
+        </if>
+        order by au.status,au.create_time desc
+    </select>
+
+    <select id="selectUserByIds" parameterType="integer" resultType="com.bee.platform.common.entity.AuthPlatformUserInfo">
+        select id as id ,`name` as `name` from auth_platform_user where  status =1 and deleted=0
+        <if test="data!=null and data.size>0">
+            and id in
+            <foreach collection="data" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+</mapper>

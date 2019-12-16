@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProArtificialFeedMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProArtificialFeed">
+        <id column="id" property="id" />
+        <result column="furnace_id" property="furnaceId" />
+        <result column="furnace_name" property="furnaceName" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="shift" property="shift" />
+        <result column="num" property="num" />
+        <result column="unit" property="unit" />
+        <result column="warehouse_id" property="warehouseId" />
+        <result column="warehouse_name" property="warehouseName" />
+        <result column="add_reason" property="addReason" />
+        <result column="blanking_time" property="blankingTime" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, furnace_id, furnace_name, product_id, product_name, product_spec_id, product_spec_name, shift, num, unit, warehouse_id, warehouse_name, add_reason, blanking_time, create_time, modify_time, status
+    </sql>
+    
+    <select id="findConsume" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProArtificialFeedDTO">
+        select paf.furnace_id, paf.furnace_name, sum(IFNULL(paf.num, 0)) num,
+        <if test="timeRange != null">
+            <if test="timeRange == 1 or timeRange == 2">
+                DATE_FORMAT(paf.blanking_time,'%Y-%m-%d') currentDate,
+            </if>
+            <if test="timeRange == 3">
+                DATE_FORMAT(paf.blanking_time,'%Y-%m') currentDate,
+            </if>
+            <if test="timeRange == 4">
+                paf.blanking_time currentDate,
+            </if>
+        </if>
+        paf.product_id, paf.product_name, paf.product_spec_id, paf.product_spec_name
+        from pro_artificial_feed paf
+        where paf.status = 1
+        <if test="startTime != null">
+            and paf.blanking_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and paf.blanking_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="enterpriseId != null">
+            and paf.company_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and paf.factory_id = #{factoryId}
+        </if>
+        <if test="productId != null">
+            and paf.finish_product_id = #{productId}
+        </if>
+        group by currentDate, paf.furnace_id
+    </select>
+
+    <select id="findMainOrAuxiliary" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProArtificialFeedDTO">
+        select sum(IFNULL(paf.num, 0)) num,
+        paf.product_id, paf.product_name, paf.product_spec_id, paf.product_spec_name
+        from pro_artificial_feed paf
+        where paf.status = 1
+        <if test="startTime != null">
+            and paf.blanking_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and paf.blanking_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="productId != null">
+            and paf.finish_product_id = #{productId}
+        </if>
+        <if test="materialType != null">
+            and paf.type = #{materialType}
+        </if>
+        <if test="enterpriseId != null">
+            and paf.company_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and paf.factory_id = #{factoryId}
+        </if>
+        <if test="productId != null">
+            and paf.finish_product_id = #{productId}
+        </if>
+        group by paf.product_id, paf.product_spec_id
+    </select>
+
+</mapper>

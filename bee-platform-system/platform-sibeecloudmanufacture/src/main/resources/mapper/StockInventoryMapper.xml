@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.StockInventoryMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.StockInventory">
+        <id column="id" property="id" />
+        <result column="inventory_order_id" property="inventoryOrderId" />
+        <result column="inventory_name" property="inventoryName" />
+        <result column="inventory_type" property="inventoryType"/>
+        <result column="factory_id" property="factoryId" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="remarks" property="remarks" />
+        <result column="status" property="status" />
+        <result column="immutable" property="immutable"/>
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, inventory_order_id, inventory_name,inventory_type, factory_id, enterprise_id, remarks, status,immutable,
+        create_id, creator,create_time, modify_id, modifier, modify_time
+    </sql>
+
+    <select id="countCurDateByOrder" resultType="int">
+        select count(1) from stock_inventory where status =1 and date(create_time) = curdate();
+    </select>
+
+    <select id="getInventoryInfoList" resultMap="BaseResultMap">
+        select inventory_order_id,creator,create_time from stock_inventory where status =1 and immutable=1
+        <if test="param.enterpriseId!=null">
+            and enterprise_id =#{param.enterpriseId}
+        </if>
+        <if test="param.factoryId!=null">
+            and factory_id =#{param.factoryId}
+        </if>
+        <if test="param.startTime!=null">
+            and create_time <![CDATA[ >= ]]> #{param.startTime}
+        </if>
+        <if test="param.endTime!=null">
+            and create_time <![CDATA[ <= ]]> #{param.endTime}
+        </if>
+        order by create_time desc
+    </select>
+</mapper>

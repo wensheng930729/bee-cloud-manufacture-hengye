@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: platform-schedule
+
+# 注意：本例中的spring.application.name只能放在bootstrap.*文件中，不能放在application.*文件中，因为我们使用了自定义的logback-spring.xml。

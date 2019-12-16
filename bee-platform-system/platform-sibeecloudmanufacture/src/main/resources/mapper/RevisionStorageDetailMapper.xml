@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.RevisionStorageDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.RevisionStorageDetail">
+        <id column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="revise_product_number" property="reviseProductNumber" />
+        <result column="revise_amount" property="reviseAmount" />
+        <result column="current_product_number" property="currentProductNumber" />
+        <result column="product_unit" property="productUnit" />
+        <result column="storage_id" property="storageId" />
+        <result column="storage_name" property="storageName" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, product_id, product_name, revise_product_number, revise_amount, current_product_number, product_unit, storage_id, storage_name, status, create_id, creator, create_time
+    </sql>
+
+</mapper>

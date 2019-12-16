@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.FreeStorageDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.FreeStorageDetail">
+        <id column="id" property="id" />
+        <result column="free_storage_detail_id" property="freeStorageDetailId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="org_id" property="orgId" />
+        <result column="contract_id" property="contractId" />
+        <result column="product_id" property="productId" />
+        <result column="product_number" property="productNumber" />
+        <result column="product_name" property="productName" />
+        <result column="product_unit" property="productUnit" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="storage_time" property="storageTime" />
+        <result column="storage_id" property="storageId" />
+        <result column="storage_name" property="storageName" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, free_storage_detail_id, factory_id, org_id, contract_id, product_id, product_number, product_name, product_unit, product_spec_id, product_spec_name, storage_time, storage_id, storage_name, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+
+    <select id="getTodayIntoStock" parameterType="map" resultType="decimal">
+          SELECT SUM(a.product_number)
+          FROM free_storage_detail a
+          WHERE a.storage_time LIKE CONCAT('%',#{dayTime},'%')
+          GROUP BY product_id,product_spec_id
+          HAVING product_id = #{productId} and product_spec_id = #{productSpecId}
+    </select>
+
+    <select id="getTodayIntoStockAfter" parameterType="map" resultType="decimal">
+          SELECT SUM(a.product_number)
+          FROM free_storage_detail a
+          WHERE
+          <![CDATA[ DATE_FORMAT( a.storage_time , '%Y-%m-%d') >  DATE_FORMAT(#{dayTime}, '%Y-%m-%d')]]>
+          GROUP BY product_id,product_spec_id
+          HAVING product_id = #{productId} and product_spec_id = #{productSpecId}
+    </select>
+
+</mapper>

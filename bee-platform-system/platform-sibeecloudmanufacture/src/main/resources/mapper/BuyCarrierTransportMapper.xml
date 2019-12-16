@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.BuyCarrierTransportMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.BuyCarrierTransport">
+        <id column="id" property="id" />
+        <result column="batch_id" property="batchId" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="carrier_transport_id" property="carrierTransportId" />
+        <result column="transport_section_id" property="transportSectionId" />
+        <result column="carrier_id" property="carrierId" />
+        <result column="carrier_name" property="carrierName" />
+        <result column="transport_mode" property="transportMode" />
+        <result column="to_factory" property="toFactory" />
+        <result column="starting_place_id" property="startingPlaceId" />
+        <result column="starting_place" property="startingPlace" />
+        <result column="arrival_place_id" property="arrivalPlaceId" />
+        <result column="arrival_place" property="arrivalPlace" />
+        <result column="freight_volume" property="freightVolume" />
+        <result column="unit_price" property="unitPrice" />
+        <result column="carriage" property="carriage" />
+        <result column="departure_time" property="departureTime" />
+        <result column="estimate_arrival_time" property="estimateArrivalTime" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, batch_id, contract_business_id, carrier_transport_id, transport_section_id, carrier_id, carrier_name,
+        transport_mode, to_factory, starting_place_id, starting_place, arrival_place_id, arrival_place, freight_volume,
+        unit_price, carriage, departure_time, estimate_arrival_time, status, create_id, creator, create_time, modify_id,
+        modifier, modify_time, remark
+    </sql>
+
+    <!-- 根据承运商名称查询承运商正在运输的运输段信息 -->
+    <select id="getTransportInfoByCarrier" resultMap="BaseResultMap">
+        select ct.* from buy_contract_basic c inner join buy_carrier_transport ct
+          on ct.contract_business_id = c.contract_business_id
+        where c.status = '1' and ct.status = '1' and c.completed = '0'
+          and ct.carrier_name = #{carrierName}
+        order by ct.create_time desc
+    </select>
+
+    <!-- 根据条件查询所有采购运输台账信息 -->
+    <select id="getBuyLogisticsReportForm" resultType="com.bee.platform.cloud.si.manufacture.dto.BuyTransportReportDTO" parameterType="map">
+        SELECT
+        bb.supplier_name as supplierName,
+        bt.carrier_name as carrierName,
+        bb.contract_num as contractNum,
+        bb.product_name as productName,
+        bb.quantity,
+        bt.departure_time as departureTime,
+        bt.starting_place as startingPlace,
+        bt.arrival_place as arrivalPlace,
+        bt.unit_price as unitPrice
+        FROM
+        buy_carrier_transport bt
+        left JOIN buy_contract_basic bb ON bt.contract_business_id = bb.contract_business_id
+        where 1=1 and bb.enterprise_id = #{enterpriseId} and bb.factory_id = #{factoryId}
+        <if test="supplierName != null">
+            and bb.supplier_name like concat('%',#{supplierName},'%')
+        </if>
+        <if test="productName != null">
+            and bb.product_name like concat('%',#{productName},'%')
+        </if>
+        <if test="startTime != null">
+            and bb.create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            and bb.create_time &lt;= #{endTime}
+        </if>
+        <if test="sort == 'asc'">
+            order by bt.departure_time asc
+        </if>
+        <if test="sort == 'desc'">
+            order by bt.departure_time desc
+        </if>
+    </select>
+
+</mapper>

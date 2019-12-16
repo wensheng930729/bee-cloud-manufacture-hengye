@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.FinishedProductOutStorageDetailMapper">
+
+
+    <insert id="bulkInsert" parameterType="java.util.List">
+        insert into finished_product_out_storage_detail
+          (contract_car_id,factory_id,org_id,ton_bag_number,product_number,product_id,product_name,product_unit,product_spec_id,product_spec_name
+          ,out_storage_time,create_id,creator,create_time)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+                #{item.contractCarId},
+                #{item.factoryId},
+                #{item.orgId},
+                #{item.tonBagNumber},
+                #{item.productNumber},
+                #{item.productId},
+                #{item.productName},
+                #{item.productUnit},
+                #{item.productSpecId},
+                #{item.productSpecName},
+                #{item.outStorageTime},
+                #{item.createId},
+                #{item.creator},
+                #{item.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectSaleOutStorageTonBagDTOById"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SaleOutStorageTonBagDTO">
+        SELECT sd.ton_bag_number,sd.product_number,sd.product_unit,r.`name` storageName FROM finished_product_out_storage_detail sd
+        JOIN finished_product_pending_storage ps ON sd.ton_bag_number = ps.ton_bag_number
+        JOIN config_repository r ON r.id = ps.storage_id
+        WHERE sd.contract_car_id = #{contractCarId}
+    </select>
+
+    <select id="selectSampleInfo" resultType="com.bee.platform.cloud.si.manufacture.dto.SampleQualityTestDTO">
+        SELECT s.sample_code,DATE_FORMAT(s.assay_time,'%Y-%m-%d') assay_time
+        FROM finished_product_out_storage_detail sd
+        JOIN sale_sample_ton_relation sr ON sd.ton_bag_number = sr.ton_code
+        JOIN sale_sample s ON sr.sample_code = s.sample_code
+        WHERE
+        sd.contract_car_id = #{contractCarId}
+    </select>
+
+
+    <select id="getProductWarehouseReportFormByPage" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ReportFormProductWarehouseDTO">
+        SELECT
+            DATE_FORMAT( fpps.storage_time, '%Y-%m-%d' ) storage_date,
+            fpps.product_name,
+            fpps.product_spec_name,
+            fpps.furnace_number,
+            fpps.scheduling,
+            fpps.furnace_times,
+            cr.NAME AS storage_name,
+            SUM( product_number ) ton_weight,
+            pb.sample_code
+        FROM
+            finished_product_pending_storage fpps
+            LEFT JOIN config_repository cr ON fpps.storage_id = cr.id
+            LEFT JOIN pro_bagging pb on fpps.ton_bag_number = pb.bagging_code
+        WHERE
+            1 =1
+            <if test="enterpriseId != null">
+                AND cr.enterprise_id = #{enterpriseId}
+            </if>
+            <if test="factoryId != null">
+                AND cr.factory_id = #{factoryId}
+            </if>
+            <if test="productId != null and productId != ''">
+                AND fpps.product_id = #{productId}
+            </if>
+            <if test="depositoryId != null">
+                AND cr.id = #{depositoryId}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND fpps.storage_time <![CDATA[>= ]]> #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND fpps.storage_time <![CDATA[<= ]]> #{endTime}
+            </if>
+            <if test="putStorage != null and putStorage != ''">
+                AND fpps.put_storage = #{putStorage}
+            </if>
+            <if test="status != null and status != ''">
+                AND fpps.status = #{status} AND cr.status = #{status} AND cr.deleted = 0
+            </if>
+        GROUP BY
+            DATE_FORMAT( fpps.storage_time, '%Y-%m-%d' ),
+            fpps.product_spec_id,
+            fpps.furnace_number,
+            fpps.scheduling,
+            fpps.furnace_times
+        ORDER BY
+            fpps.storage_time DESC
+    </select>
+
+
+    <select id="getReportProductOutStorage" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ReportProductOutStorageDTO">
+        SELECT * FROM (SELECT
+        DATE_FORMAT( a.out_storage_time, '%Y-%m-%d' ) AS out_storage_time,
+        a.product_name,
+        a.product_spec_id,
+        a.product_spec_name,
+        c.NAME AS storage_name,
+        sum(a.product_number) AS out_storage_number
+        FROM
+        finished_product_out_storage_detail a,
+        finished_product_pending_storage b,
+        config_repository c
+        WHERE
+        1 =1
+        AND a.ton_bag_number = b.ton_bag_number
+        AND b.storage_id = c.id
+        AND b.put_storage = 1
+        AND b.status = 1
+        <if test="enterpriseId != null">
+            AND a.org_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        <if test="productId != null and productId != ''">
+            AND a.product_id = #{productId}
+        </if>
+        <if test="storageId != null">
+            AND b.storage_id = #{storageId}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND a.out_storage_time <![CDATA[>= ]]> #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND a.out_storage_time <![CDATA[<= ]]> #{endTime}
+        </if>
+        GROUP BY
+        DATE_FORMAT( a.out_storage_time, '%Y-%m-%d' ),
+        b.storage_id,
+        a.product_spec_id
+        ORDER BY
+        a.out_storage_time DESC)
+        AS table1
+        UNION ALL
+        SELECT * FROM(SELECT
+        DATE_FORMAT( d.receive_time, '%Y-%m-%d' ) AS out_storage_time,
+        f.NAME AS product_name,
+        d.product_spec_id,
+        d.product_spec_name,
+        d.storage_name,
+        sum(d.product_number) AS out_storage_number
+        FROM pick_out_storage_detail d ,config_product f
+        WHERE
+        1 =1
+        AND d.product_id = f.id
+        AND d.status = 1
+        <if test="enterpriseId != null">
+            AND d.org_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            AND d.factory_id = #{factoryId}
+        </if>
+        <if test="productId != null and productId != ''">
+            AND d.product_id = #{productId}
+        </if>
+        <if test="storageId != null">
+            AND d.storage_id = #{storageId}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND d.receive_time <![CDATA[>= ]]> #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND d.receive_time <![CDATA[<= ]]> #{endTime}
+        </if>
+        GROUP BY
+        DATE_FORMAT( d.receive_time, '%Y-%m-%d' ),
+        d.storage_id,
+        d.product_spec_id
+        ORDER BY
+        d.receive_time DESC )
+        AS table2
+    </select>
+
+
+    <select id="selectTonOutList" resultType="com.bee.platform.cloud.si.manufacture.dto.SaleOutStorageTonBagDTO" parameterType="string">
+        SELECT
+            d.id,
+            d.ton_bag_number AS tonBagNumber,
+            d.product_number AS productNumber,
+            r.`name` AS storageName
+        FROM
+            finished_product_out_storage_detail d,
+            finished_product_pending_storage s,
+            config_repository r
+        WHERE 1=1
+            AND d.ton_bag_number = s.ton_bag_number
+            AND s.storage_id = r.id
+            AND d.contract_car_id=#{contractCarId}
+    </select>
+
+</mapper>

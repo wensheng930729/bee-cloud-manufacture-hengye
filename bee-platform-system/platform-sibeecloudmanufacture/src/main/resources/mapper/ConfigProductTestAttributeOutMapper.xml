@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ConfigProductTestAttributeOutMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ConfigProductTestAttributeOut">
+        <id column="id" property="id" />
+        <result column="factory_id" property="factoryId" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="product_id" property="productId" />
+        <result column="assay_item_out" property="assayItemOut" />
+        <result column="mark_out" property="markOut" />
+        <result column="assay_formula" property="assayFormula" />
+        <result column="test_unit" property="testUnit" />
+        <result column="decimal_digit" property="decimalDigit" />
+        <result column="deleted" property="deleted" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, factory_id, enterprise_id, product_id, assay_item_out, mark_out, assay_formula,test_unit,decimal_digit, deleted, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+</mapper>

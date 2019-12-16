@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.StorageInventoryMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.StorageInventory">
+        <id column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_number" property="productNumber" />
+        <result column="product_unit" property="productUnit" />
+        <result column="storage_id" property="storageId" />
+        <result column="storage_name" property="storageName" />
+        <result column="version" property="version" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="factory_id" property="factoryId" />
+        <result column="org_id" property="orgId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, product_id, product_name, product_number, product_unit, storage_id, storage_name, factory_id,org_id,version, status, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+    <update id="updateInventory" parameterType="list">
+        <foreach collection="list" index="index" item="item" open="" separator=";" close="">
+            update storage_Inventory
+            <set>
+                product_number = product_number - #{item.num}
+            </set>
+            where status = 1 and product_id = #{item.productId} and storage_id = #{item.warehouseId}
+        </foreach>
+    </update>
+    <select id="selectStorageManagerList" resultType="com.bee.platform.cloud.si.manufacture.dto.StorageManagerListDTO">
+        SELECT si.product_id,si.product_name,si.product_unit,si.storage_id,si.storage_name,si.product_spec_id,si.product_spec_name
+        ,si.product_number product_amount
+        FROM storage_inventory si
+        WHERE
+        si.product_id IN(
+            SELECT cp.id FROM config_product cp
+            JOIN config_product_category pc ON cp.category_id = pc.id
+            WHERE
+            pc.`name` = #{typeName} AND cp.enterprise_id = #{orgId} AND cp.factory_id = #{factoryId}
+            <if test="productName != '' and productName != null">
+                AND cp.name like concat('%',#{productName},'%')
+            </if>
+        )
+    </select>
+    <select id="selectOtherStorageManagerList"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.StorageManagerListDTO">
+        SELECT si.product_id,si.product_name,si.product_unit,si.storage_id,si.storage_name,si.product_spec_id,si.product_spec_name
+        ,SUM(si.product_number) product_amount
+        FROM storage_inventory si
+        WHERE
+        si.product_id IN(
+        SELECT cp.id FROM config_product cp
+        JOIN config_product_category pc ON cp.category_id = pc.id
+        WHERE
+        pc.`name` NOT IN('成品','主料','辅料') AND cp.enterprise_id = #{orgId} AND cp.factory_id = #{factoryId}
+        <if test="productName != '' and productName != null">
+            AND cp.name like concat('%',#{productName},'%')
+        </if>
+        )
+    </select>
+
+    <select id="findStorageProducts" resultType="com.bee.platform.cloud.si.manufacture.dto.ProductStorageDTO">
+        select cp.id productId, cp.name productName, cp.unit_value productUnit
+        from config_product cp
+        inner join config_product_category cpc on cpc.id = cp.category_id
+        and cpc.status = 1 and cpc.id != 3 and cpc.deleted = 0
+        where cp.status = 1
+        <if test="enterpriseId != null">
+            and cp.enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and cp.factory_id = #{factoryId}
+        </if>
+    </select>
+
+    <select id="getOriginalStock" parameterType="map" resultType="decimal">
+      SELECT SUM(a.product_number)
+      FROM storage_inventory a
+      WHERE  a.status =1
+      AND product_id = #{productId}
+      AND product_spec_id = #{productSpecId}
+    </select>
+</mapper>

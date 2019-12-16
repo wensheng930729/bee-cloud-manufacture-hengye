@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.SaleContractAttachmentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.SaleContractAttachment">
+        <id column="id" property="id" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="file_name" property="fileName" />
+        <result column="file_url" property="fileUrl" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, contract_business_id, file_name, file_url, status, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+    <insert id="insertAttachments" parameterType="com.bee.platform.cloud.si.manufacture.entity.SaleContractAttachment">
+        insert into sale_contract_attachment  (contract_business_id, file_name, file_url, status, create_id,
+        creator, create_time,modify_id,modifier,modify_time) values
+        <foreach collection="data" item="item" separator=",">
+            (
+            #{item.contractBusinessId,jdbcType=VARCHAR},
+            #{item.fileName,jdbcType=VARCHAR},
+            #{item.fileUrl,jdbcType=VARCHAR},
+            #{item.status,jdbcType=TINYINT},
+            #{item.createId,jdbcType=BIGINT},
+            #{item.creator,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.modifyId,jdbcType=BIGINT},
+            #{item.modifier,jdbcType=VARCHAR},
+            #{item.modifyTime,jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+</mapper>

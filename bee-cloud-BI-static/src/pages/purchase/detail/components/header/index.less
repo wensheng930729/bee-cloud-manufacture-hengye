@@ -1,0 +1,55 @@
+@import '~@/utils/configs.less';
+
+.container {
+  background-color: @component-background;
+  padding: @padding-lg;
+  padding-top: 0;
+  line-height: @lineHeight-base;
+
+  .left {
+    .title {
+      font-size: @heading-3-size;
+      color: @heading-color;
+    }
+
+    .info {
+      line-height: @lineHeight-lg;
+      margin-top: @padding-sm;
+    }
+  }
+
+  .right {
+    position: absolute;
+    top: @padding-sm;
+    right: 30px;
+
+    .options {
+      button {
+        margin-left: 18px;
+      }
+    }
+
+    .statistics {
+      display: flex;
+      margin-top: 15px;
+      justify-content: flex-end;
+
+      div {
+        margin-left: @padding-sm;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        span {
+          &:first-child {
+            font-weight: bold
+          }
+        }
+      }
+    }
+  }
+
+  .tabCard {
+    border: none !important;
+  }
+}

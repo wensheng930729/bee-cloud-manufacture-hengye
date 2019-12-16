@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ConfigProductSpecMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ConfigProductSpec">
+        <id column="id" property="id" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="spec_name" property="specName" />
+        <result column="qualified_line" property="qualifiedLine" />
+        <result column="status" property="status" />
+        <result column="sort" property="sort" />
+        <result column="deleted" property="deleted" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, factory_id, product_id,product_name, spec_name, qualified_line, status, sort, deleted, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+    <select id="getProductSpecByProductIds" parameterType="com.bee.platform.cloud.si.manufacture.dto.ProductSpecParam"
+            resultType="com.bee.platform.cloud.si.manufacture.entity.ConfigProductSpec">
+        select sp.id  ,sp.product_id as productId,sp.spec_name as specName,
+        pr.name as productName
+        from config_product_spec sp inner join  config_product pr on sp.product_id = pr.id
+        where sp.status =1 and sp.deleted =0
+        <if test="param.factoryId!=null">
+            and sp.factory_id=#{param.factoryId}
+        </if>
+        <if test="param.categoryIds!=null and param.categoryIds.size>0">
+            and pr.category_id in
+            <foreach collection="param.categoryIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="param.productIds!=null and param.productIds.size>0">
+            and sp.product_id in
+            <foreach collection="param.productIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+</mapper>

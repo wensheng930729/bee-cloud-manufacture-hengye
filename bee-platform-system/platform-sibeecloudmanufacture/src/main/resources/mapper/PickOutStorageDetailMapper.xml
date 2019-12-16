@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.PickOutStorageDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.PickOutStorageDetail">
+        <id column="id" property="id" />
+        <result column="storage_id" property="storageId" />
+        <result column="product_id" property="productId" />
+        <result column="product_number" property="productNumber" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="receiver" property="receiver" />
+        <result column="receive_time" property="receiveTime" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, storage_id, product_id, product_number,product_spec_id,product_spec_name, receiver, receive_time, status, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+
+    <select id="getTodayUsed" parameterType="map" resultType="decimal">
+          SELECT SUM(a.product_number)
+          FROM pick_out_storage_detail a
+          WHERE a.receive_time LIKE CONCAT('%',#{dayTime},'%')
+          AND a.status =1
+          GROUP BY product_id,product_spec_id
+          HAVING product_id = #{productId} and product_spec_id = #{productSpecId}
+    </select>
+
+    <select id="getTodayUsedAfter" parameterType="map" resultType="decimal">
+          SELECT SUM(a.product_number)
+          FROM pick_out_storage_detail a
+          WHERE
+          <![CDATA[ DATE_FORMAT( a.receive_time , '%Y-%m-%d') >  DATE_FORMAT(#{dayTime}, '%Y-%m-%d')]]>
+          AND a.status =1
+          GROUP BY product_id,product_spec_id
+          HAVING product_id = #{productId} and product_spec_id = #{productSpecId}
+    </select>
+
+
+    <select id="getNewOutOfStockList" resultType="com.bee.platform.cloud.si.manufacture.dto.PickOutStorageDetailDTO">
+        SELECT
+            d.id,
+            d.org_id AS enterpriseId,
+            d.factory_id AS factoryId,
+            d.storage_id AS storageId,
+            d.storage_name AS storageName,
+            d.product_id AS productId,
+            p.`name` AS productName,
+            d.product_number AS productNumber,
+            d.product_spec_name AS productSpecName,
+            d.receive_time AS receiveTime,
+            d.receiver
+        FROM
+            pick_out_storage_detail d,
+            config_product p
+        WHERE 1=1
+            AND d.product_id = p.id
+            AND d.org_id=#{enterpriseId}
+            AND d.factory_id=#{factoryId}
+    </select>
+
+</mapper>

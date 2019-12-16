@@ -1,0 +1,39 @@
+@import '~@/utils/configs.less';
+
+.container {
+  background-color: #ececec;
+
+  .actions {
+    span {
+      padding: 0 10px;
+      cursor: pointer;
+      color: #1890ff;
+    }
+  }
+
+  :global {
+    .ant-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 280px;
+      background-color: #FFFFFF;
+    }
+
+    .ant-row {
+      .ant-col-24+.ant-col-24 {
+        margin-top: 24px;
+      }
+    }
+
+    .ant-table-thead>tr>th {
+      background: #ececec;
+    }
+
+    .ant-table-thead th,
+    td {
+      text-align: center;
+    }
+  }
+}

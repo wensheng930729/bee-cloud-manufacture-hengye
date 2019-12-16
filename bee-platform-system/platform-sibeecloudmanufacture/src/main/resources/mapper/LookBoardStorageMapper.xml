@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.LookBoardStorageMapper">
+
+
+    <select id="selectRawMaterialByType" resultType="com.bee.platform.cloud.si.manufacture.dto.RawMaterialDTO">
+        SELECT
+            s.product_id,s.product_name,
+            SUM(s.product_number) product_number
+        FROM
+            storage_inventory s
+        JOIN config_product p ON s.product_id = p.id
+        JOIN config_product_category pc ON p.category_id = pc.id
+        WHERE
+            pc.`name` = #{typeName}
+            AND s.org_id = #{orgId}
+            AND s.factory_id = #{factoryId}
+            GROUP BY
+                s.product_id
+    </select>
+
+    <select id="selectRawMaterialOutStorageByTime"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.OutStorageDTO">
+        SELECT sd.product_id,sd.product_name,DATE_FORMAT(sd.out_storage_time,'%Y-%m-%d') out_storage_time,SUM(sd.product_number) product_number
+        FROM production_out_storage_detail sd
+        LEFT JOIN config_product p ON sd.product_id = p.id
+        LEFT JOIN config_product_category pc ON p.category_id = pc.id
+        WHERE
+        sd.out_storage_time BETWEEN #{startTime} AND #{endTime}
+        GROUP BY DATE_FORMAT(sd.out_storage_time,'%Y-%m-%d'),sd.product_id
+    </select>
+
+    <select id="selectFinishedProductInStorageByRangTime" resultType="java.math.BigDecimal">
+        SELECT IFNULL((SELECT SUM(product_number) FROM finished_product_pending_storage
+        WHERE
+        product_id = #{productId} AND DATE_FORMAT(storage_time,'%Y-%m-%d') BETWEEN #{startTime}
+         AND #{endDate} AND put_storage = 1 AND `status`= 1 GROUP BY product_id),0.00) product_number
+    </select>
+
+    <select id="selectRawMaterialInStorageByRangTime" resultType="java.math.BigDecimal">
+        SELECT IFNULL((SELECT SUM(product_number) FROM buy_product_pending_storage
+        WHERE
+            put_storage = 1 AND `status` = 1 AND product_id = #{productId} AND DATE_FORMAT(storage_time,'%Y-%m-%d') BETWEEN #{startTime} AND #{endDate}
+            GROUP BY product_id),0.00) product_number
+    </select>
+
+    <select id="selectFreeInStorageNumberByRangtime" resultType="java.math.BigDecimal">
+        SELECT IFNULL((SELECT SUM(product_number) FROM free_storage_detail
+        WHERE
+          product_id = #{productId} AND DATE_FORMAT(storage_time,'%Y-%m-%d') BETWEEN #{startTime} AND #{endDate}
+           GROUP BY product_id),0.00) product_number
+    </select>
+
+    <select id="selectFinishedProductOutStorageByRangTime" resultType="java.math.BigDecimal">
+        SELECT IFNULL((SELECT SUM(product_number) FROM finished_product_out_storage_detail
+        WHERE
+            product_id = #{productId} AND DATE_FORMAT(out_storage_time,'%Y-%m-%d') BETWEEN #{startTime} AND #{endDate}
+            GROUP BY product_id),0.00) product_number
+    </select>
+
+    <select id="selectRawMaterialsProductOutStorageByRangTime" resultType="java.math.BigDecimal">
+        SELECT IFNULL((SELECT SUM(product_number) FROM production_out_storage_detail
+        WHERE
+            product_id = #{productId} AND `status` = 1 AND out_storage_time BETWEEN #{startTime} AND #{endDate}
+            GROUP BY product_id),0.00) product_number
+    </select>
+
+    <select id="selectFreeOutStorageNumberByRangtime" resultType="java.math.BigDecimal">
+        SELECT IFNULL((SELECT SUM(product_number) FROM pick_out_storage_detail
+        WHERE
+            product_id = #{productId} AND `status` = 1 AND DATE_FORMAT(receive_time,'%Y-%m-%d') BETWEEN #{startTime} AND #{endDate}
+            GROUP BY product_id),0.00) product_number
+    </select>
+
+    <select id="selectFinishedProductOutNumber"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.OutStorageListDTO">
+        SELECT ps.product_id,ps.product_name,DATE_FORMAT(ps.out_storage_time,#{params.format}) time,SUM(ps.product_number) product_number
+        FROM finished_product_out_storage_detail ps
+        WHERE
+        ps.product_id IN(
+            SELECT p.id FROM config_product p
+            LEFT JOIN config_product_category pc ON pc.id = p.category_id
+            WHERE
+            pc.name = #{params.typeName} AND pc.status = 1 AND pc.deleted = 0 AND p.factory_id = #{params.factoryId}
+            AND p.enterprise_id = #{params.orgId}
+        ) AND DATE_FORMAT(out_storage_time,'%Y-%m-%d') BETWEEN #{params.startTime} AND #{params.endTime}
+        GROUP BY
+        ps.product_id,DATE_FORMAT(ps.out_storage_time,#{params.format})
+    </select>
+
+    <select id="selectRawMaterialProductOutNumber"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.OutStorageListDTO">
+        SELECT product_id,product_name,DATE_FORMAT(out_storage_time,#{params.format}) time,SUM(product_number) product_number
+        FROM production_out_storage_detail sd
+        WHERE
+        sd.product_id IN(
+            SELECT p.id FROM config_product p
+            LEFT JOIN config_product_category pc ON pc.id = p.category_id
+            WHERE
+            pc.name = #{params.typeName} AND pc.status = 1 AND pc.deleted = 0 AND p.factory_id = #{params.factoryId}
+            AND p.enterprise_id = #{params.orgId}
+        ) AND DATE_FORMAT(sd.out_storage_time,'%Y-%m-%d') BETWEEN #{params.startTime} AND #{params.endTime}
+        GROUP BY
+        product_id,DATE_FORMAT(out_storage_time,#{params.format})
+    </select>
+
+    <select id="selectFreeOutStorageNumberRangTime"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.OutStorageListDTO">
+        SELECT po.product_id,cp.`name` product_name,SUM(po.product_number) product_number
+        ,DATE_FORMAT(po.receive_time,#{params.format}) time
+        FROM pick_out_storage_detail po
+        LEFT JOIN config_product cp ON cp.id = po.product_id
+        WHERE
+        po.product_id IN(
+            SELECT p.id FROM config_product p
+                    LEFT JOIN config_product_category pc ON pc.id = p.category_id
+                    WHERE
+                    pc.name = #{params.typeName} AND pc.status = 1 AND pc.deleted = 0 AND p.factory_id = #{params.factoryId}
+                    AND p.enterprise_id = #{params.orgId}
+        ) AND DATE_FORMAT(po.receive_time,'%Y-%m-%d') BETWEEN #{params.startTime} AND #{params.endTime}
+        GROUP BY
+        po.product_id,DATE_FORMAT(po.receive_time,#{params.format})
+    </select>
+
+    <select id="selectInTransit" resultType="com.bee.platform.cloud.si.manufacture.dto.RawMaterialDTO">
+        SELECT product_id,product_name,IFNULL(traffic_volume,0.00) product_number FROM buy_contract_basic bc
+        WHERE
+        bc.product_id IN(
+            SELECT p.id FROM config_product p
+                            LEFT JOIN config_product_category pc ON pc.id = p.category_id
+                            WHERE
+                            pc.name = #{typeName} AND pc.status = 1 AND pc.deleted = 0
+
+        ) AND bc.`status` = 1 AND bc.enterprise_id = #{orgId} AND bc.factory_id = #{factoryId}
+        GROUP BY product_id
+    </select>
+
+</mapper>

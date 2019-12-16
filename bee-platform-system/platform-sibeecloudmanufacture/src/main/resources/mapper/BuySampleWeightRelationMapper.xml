@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.BuySampleWeightRelationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.BuySampleWeightRelation">
+        <id column="id" property="id"/>
+        <result column="machine_id" property="machineId"/>
+        <result column="sample_code" property="sampleCode"/>
+        <result column="status" property="status"/>
+        <result column="create_id" property="createId"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_id" property="modifyId"/>
+        <result column="modifier" property="modifier"/>
+        <result column="modify_time" property="modifyTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, machine_id, sample_code, status, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+    <select id="getContractStorageDetailList" parameterType="string"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.DetailContractStorageBuyDTO">
+SELECT
+	a.machine_id AS machineId,
+	b.contract_num AS contractNum,
+	b.train_number AS trainNumber,
+	b.weighing_time AS weighingTime,
+	b.weight_man AS weightMan,
+	b.net_weight AS netWeight,
+	c.storage_id AS storageId,
+	c.storage_name AS storageName,
+	c.storage_time AS storageTime
+FROM
+	`buy_sample_weight_relation` a
+	LEFT JOIN buy_weight_machine b ON b.machine_id = a.machine_id AND a.`status` = 1
+	LEFT JOIN buy_product_pending_storage c ON c.machine_id = a.machine_id AND c.`status` = 1
+	WHERE a.sample_code = #{sampleCode}
+	AND a.`status` = 1
+    </select>
+</mapper>

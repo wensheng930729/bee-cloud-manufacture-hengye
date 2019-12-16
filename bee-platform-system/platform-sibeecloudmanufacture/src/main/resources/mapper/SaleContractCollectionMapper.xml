@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.SaleContractCollectionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.SaleContractCollection">
+        <id column="id" property="id" />
+        <result column="contract_collection_business_id" property="contractCollectionBusinessId" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="serial_num" property="serialNum" />
+        <result column="receive_time" property="receiveTime" />
+        <result column="payment_amount" property="paymentAmount" />
+        <result column="remark" property="remark" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, contract_collection_business_id, contract_business_id, serial_num, receive_time, payment_amount, remark, status, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+</mapper>

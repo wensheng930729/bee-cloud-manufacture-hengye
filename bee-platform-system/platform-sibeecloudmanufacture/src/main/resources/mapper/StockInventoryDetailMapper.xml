@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.StockInventoryDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.StockInventoryDetail">
+        <id column="id" property="id" />
+        <result column="inventory_order_id" property="inventoryOrderId" />
+        <result column="product_id" property="productId" />
+        <result column="storage_id" property="storageId" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_unit" property="productUnit" />
+        <result column="account_num" property="accountNum" />
+        <result column="actual_num" property="actualNum" />
+        <result column="difference_num" property="differenceNum" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, inventory_order_id, product_id, storage_id, product_spec_id, product_unit, account_num, actual_num, difference_num, status, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+    <insert id="insertAll" parameterType="com.bee.platform.cloud.si.manufacture.entity.StockInventoryDetail">
+        insert into stock_inventory_detail (inventory_order_id, product_id, storage_id, product_spec_id, product_unit, account_num,
+        actual_num, difference_num, status, create_id, creator, create_time) values
+        <foreach collection="data" item="item" separator=",">
+            (
+            #{item.inventoryOrderId,jdbcType=VARCHAR},
+            #{item.productId,jdbcType=INTEGER},
+            #{item.storageId,jdbcType=INTEGER},
+            #{item.productSpecId,jdbcType=INTEGER},
+            #{item.productUnit,jdbcType=VARCHAR},
+            #{item.accountNum,jdbcType=DECIMAL},
+            #{item.actualNum,jdbcType=DECIMAL},
+            #{item.differenceNum,jdbcType=DECIMAL},
+            #{item.status,jdbcType=TINYINT},
+            #{item.createId,jdbcType=INTEGER},
+            #{item.creator,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+</mapper>

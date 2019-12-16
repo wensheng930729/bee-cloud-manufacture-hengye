@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.SaleWeightMachineMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.SaleWeightMachine">
+        <id column="id" property="id" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="machine_id" property="machineId" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="contract_num" property="contractNum" />
+        <result column="batch_id" property="batchId" />
+        <result column="train_number" property="trainNumber" />
+        <result column="driver" property="driver" />
+        <result column="device_id" property="deviceId" />
+        <result column="carrier_name" property="carrierName" />
+        <result column="delivery_company" property="deliveryCompany" />
+        <result column="receiving_company" property="receivingCompany" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="cargo_weight" property="cargoWeight" />
+        <result column="weighing_time" property="weighingTime" />
+        <result column="in_factory_weight" property="inFactoryWeight" />
+        <result column="out_factory_weight" property="outFactoryWeight" />
+        <result column="net_weight" property="netWeight" />
+        <result column="arrival_time" property="arrivalTime" />
+        <result column="is_weight" property="isWeight" />
+        <result column="sample_status" property="sampleStatus" />
+        <result column="sample_push_status" property="samplePushStatus" />
+        <result column="sample_push_time" property="samplePushTime" />
+        <result column="quality_exam_status" property="qualityExamStatus" />
+        <result column="assay_result" property="assayResult" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="remark" property="remark" />
+        <result column="data_source" property="dataSource" />
+        <result column="carrier_id" property="carrierId" />
+        <result column="delivery_company_id" property="deliveryCompanyId" />
+        <result column="receiving_company_id" property="receivingCompanyId" />
+        <result column="deduct_weight" property="deductWeight" />
+        <result column="deduct_weight_by_manual" property="deductWeightByManual" />
+        <result column="weight_man" property="weightMan" />
+        <result column="is_push_storage" property="isPushStorage" />
+        <result column="contact" property="contact" />
+        <result column="bind_ignore" property="bindIgnore" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, factory_id, machine_id,contract_business_id, contract_num, batch_id,
+        train_number, driver, device_id, carrier_name,delivery_company, receiving_company, product_id,product_name,
+        cargo_weight, weighing_time, in_factory_weight, out_factory_weight,in_factory_weight_by_manual,
+        out_factory_weight_by_manual, in_factory_weight_is_confirm,
+        out_factory_weight_is_confirm, net_weight, arrival_time,
+        is_weight, sample_status, sample_push_status,
+        sample_push_time, quality_exam_status, assay_result,
+        status, create_id, creator, create_time, modify_id,
+        modifier, modify_time, remark,data_source,
+        carrier_id,delivery_company_id,receiving_company_id,deduct_weight,deduct_weight_by_manual,
+        weight_man,is_push_storage,contact,bind_ignore
+    </sql>
+
+    <select id="getWeightMachineListTotal" parameterType="int"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.WeightMachineTotalDTO">
+        SELECT
+        contract_num AS contractNum,
+        SUM(net_weight) AS alreadyWeightAmount,
+        COUNT(1) AS alreadyWeightCars
+        FROM sale_weight_machine
+        WHERE is_weight = 1
+        AND enterprise_id = #{orgId}
+        AND status = 1
+        GROUP BY contract_num
+        ORDER BY create_time desc
+    </select>
+
+    <!-- 通过合同id查询称重总重量 -->
+    <select id="getTotalByContract" resultType="java.math.BigDecimal">
+        select ifnull(sum(ifnull(t.net_weight, 0)),0) from sale_weight_machine t
+        where t.contract_business_id = #{contractBusinessId} and t.status = '1'
+          and t.is_weight = '1'
+    </select>
+
+    <update id="batchBindContract" parameterType="java.util.List">
+        <foreach collection="list" separator=";" item="item">
+            update sale_weight_machine
+            set
+            contract_business_id = #{item.contractBusinessId},
+            contract_num = #{item.contractNum},
+            modify_id = #{item.userId},
+            modifier = #{item.userName},
+            modify_time = SYSDATE()
+            where machine_id = #{item.machineId}
+        </foreach>
+    </update>
+
+</mapper>

@@ -1,0 +1,236 @@
+[
+  {
+    "path": "/board",
+    "name": "总览"
+  },
+  {
+    "path": "/reportForm",
+    "name": "报表",
+    "routes": [
+      {
+        "path": "/reportForm/inventory",
+        "name": "库存报表"
+      },
+      {
+        "path": "/reportForm/qualityInspection",
+        "name": "质检报表"
+      },
+      {
+        "path": "/reportForm/purchase",
+        "name": "采购报表"
+      },
+      {
+        "path": "/reportForm/sales",
+        "name": "销售报表"
+      },
+      {
+        "path": "/reportForm/yieldAnalysis",
+        "name": "产量分析"
+      },
+      {
+        "path": "/reportForm/logistics",
+        "name": "物流报表"
+      },
+      {
+        "path": "/reportForm/passRate",
+        "name": "合格率"
+      },
+      {
+        "path": "/reportForm/productConsumptAnaly",
+        "name": "产量、消耗分析表"
+      }
+    ]
+  },
+  {
+    "path": "/purchase",
+    "name": "采购管理",
+    "routes": [
+      {
+        "path": "/purchase/order",
+        "name": "采购订单",
+        "isHide": true,
+        "routes": [
+          {
+            "path": "/purchase/order/index",
+            "name": "采购列表"
+          },
+          {
+            "path": "/purchase/order/detail",
+            "name": "订单详情"
+          },
+          {
+            "path": "/purchase/order/add",
+            "name": "新增合同"
+          }
+        ]
+      },
+      {
+        "path": "/purchase/settle",
+        "name": "采购结算"
+      }
+    ]
+  },
+  {
+    "path": "/sale",
+    "name": "销售订单",
+    "isHide": true,
+    "routes": [
+      {
+        "path": "/sale/detail",
+        "name": "订单详情"
+      },
+      {
+        "path": "/sale/add",
+        "name": "新增合同"
+      }
+    ]
+  },
+  {
+    "path": "/inventoryManage",
+    "name": "库存管理",
+    "routes": [
+      {
+        "path": "/inventoryManage/purchaseWarehousing",
+        "name": "采购入库",
+        "routes": [
+          {
+            "path": "/inventoryManage/purchaseWarehousing/index",
+            "name": "采购列表"
+          },
+          {
+            "isHide": true,
+            "path": "/inventoryManage/purchaseWarehousing/detail",
+            "name": "采购详情"
+          }
+        ]
+      },
+      {
+        "path": "/inventoryManage/productStorage",
+        "name": "成品入库"
+      },
+      {
+        "path": "/inventoryManage/weightMachine",
+        "name": "地磅单"
+      },
+      {
+        "path": "/inventoryManage/salesOutStock",
+        "name": "销售出库",
+        "routes": [
+          {
+            "path": "/inventoryManage/salesOutStock/index",
+            "name": "销售列表"
+          },
+          {
+            "isHide": true,
+            "path": "/inventoryManage/salesOutStock/detail",
+            "name": "销售详情"
+          }
+        ]
+      },
+      {
+        "path": "/inventoryManage/existingQuantityQuery",
+        "name": "现存量查询"
+      },
+      {
+        "path": "/inventoryManage/inventory",
+        "name": "盘点管理",
+        "isHide": true,
+        "routes": [
+          {
+            "path": "/inventoryManage/inventory/index",
+            "name": "盘点列表"
+          },
+          {
+            "path": "/inventoryManage/inventory/Edit",
+            "name": "新增盘点单"
+          },
+          {
+            "path": "/inventoryManage/inventory/detail",
+            "name": "盘点详情"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "/logisticsManage",
+    "name": "物流管理",
+    "routes": [
+      {
+        "path": "/logisticsManage/contractStatement",
+        "name": "合同外磅单"
+      },
+      {
+        "path": "/logisticsManage/order",
+        "name": "物流订单",
+        "isHide": true,
+        "routes": [
+          {
+            "path": "/logisticsManage/order/index",
+            "name": "订单列表"
+          },
+          {
+            "path": "/logisticsManage/order/detail",
+            "name": "订单详情"
+          },
+          {
+            "path": "/logisticsManage/order/transportDetail",
+            "name": "承运商详情"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "/weighbridge",
+    "name": "磅房管理",
+    "routes": [
+      {
+        "isHide": true,
+        "path": "/weighbridge/purchase",
+        "name": "采购过磅",
+        "routes": [
+          {
+            "path": "/weighbridge/purchase/index",
+            "name": "过磅车辆列表"
+          },
+          {
+            "path": "/weighbridge/purchase/add",
+            "name": "新增称重"
+          },
+          {
+            "path": "/weighbridge/purchase/edit",
+            "name": "开始称重"
+          },
+          {
+            "path": "/weighbridge/purchase/detail",
+            "name": "磅单详情"
+          }
+        ]
+      },
+      {
+        "isHide": true,
+        "path": "/weighbridge/sale",
+        "name": "销售过磅",
+        "routes": [
+          {
+            "path": "/weighbridge/sale/index",
+            "name": "过磅车辆列表"
+          },
+          {
+            "path": "/weighbridge/sale/add",
+            "name": "新增称重"
+          },
+          {
+            "path": "/weighbridge/sale/edit",
+            "name": "开始称重"
+          },
+          {
+            "path": "/weighbridge/sale/detail",
+            "name": "磅单详情"
+          }
+        ]
+      }
+    ]
+  }
+]

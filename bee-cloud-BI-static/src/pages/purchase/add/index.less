@@ -1,0 +1,66 @@
+.container {
+  margin: 24px 32px;
+  background: transparent;
+
+  .header {
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFFFFF;
+
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333333;
+    }
+
+    .btnBox {
+      button+button {
+        margin-left: 18px;
+      }
+    }
+  }
+
+  .footer {
+    margin-top: 24px;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: #FFFFFF;
+
+    .btnBox {
+      button+button {
+        margin-left: 18px;
+      }
+    }
+  }
+
+  :global {
+    .ant-card {
+      margin-top: 24px;
+
+      .ant-card-head-title {
+        font-weight: bold;
+      }
+    }
+
+    .ant-form {
+      display: flex;
+      flex-wrap: wrap;
+
+      .ant-form-item {
+        width: 33%;
+      }
+    }
+
+    table {
+
+      th,
+      td {
+        text-align: center;
+      }
+    }
+  }
+}

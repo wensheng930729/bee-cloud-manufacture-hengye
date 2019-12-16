@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.user.dao.mapper.AuthResourceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.user.entity.AuthResource">
+        <id column="id" property="id" />
+        <result column="pid" property="pid" />
+        <result column="sub_sys" property="subSys" />
+        <result column="name" property="name" />
+        <result column="resource_type" property="resourceType" />
+        <result column="icon" property="icon" />
+        <result column="path" property="path" />
+        <result column="component" property="component" />
+        <result column="order_num" property="orderNum" />
+        <result column="is_hide" property="isHide" />
+        <result column="position" property="position"/>
+        <result column="show_type" property="showType" />
+        <result column="deleted" property="deleted" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, pid, sub_sys, `name`, `resource_type`, icon, path, component, order_num, is_hide,`position`,
+        show_type, deleted, create_time, update_time
+    </sql>
+
+    <select id="getResourceByRoleId" resultMap="BaseResultMap">
+        select  re.id, re.pid, re.sub_sys, re.`name`, re.`resource_type`, re.icon, re.path, re.component, re.order_num, re.is_hide
+        from  auth_role_resource ar
+        inner join auth_resource re on ar.resource_id=re.id where  re.deleted=0 and ar.role_id=#{roleId}
+        <if test="cloudMafType!=null and cloudMafType!=''">
+            and re.sub_sys=#{cloudMafType}
+        </if>
+    </select>
+
+    <select id="checkFunctionIds" resultMap="BaseResultMap">
+        select id,`position` from auth_resource where  deleted=0
+        <if test="resourceType!=null and resourceType!=''">
+            and resource_type=#{resourceType}
+        </if>
+        <if test="subSys!=null and subSys!=''">
+            and sub_sys=#{subSys}
+        </if>
+        <if test="data!=null and data.size>0">
+            and id in
+            (
+            <foreach collection="data" item="item" separator=",">
+                #{item}
+            </foreach>
+            )
+        </if>
+    </select>
+
+    <select id="getResourceIdByPosition"  resultType="integer">
+        select id from auth_resource where  deleted=0
+        <if test="data!=null and data.size>0">
+            and `position` in
+            (
+            <foreach collection="data" item="item" separator=",">
+                #{item}
+            </foreach>
+            )
+        </if>
+    </select>
+</mapper>

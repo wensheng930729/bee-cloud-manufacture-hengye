@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProIngredientMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProIngredient">
+        <id column="id" property="id" />
+        <result column="batch_id" property="batchId" />
+        <result column="material_name" property="materialName" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="create_id" property="createId" />
+        <result column="modify_id" property="modifyId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="company_id" property="companyId" />
+        <result column="type" property="type" />
+        <result column="blanking_status" property="blankingStatus" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, batch_id, material_name, create_time, modify_time, create_id, modify_id, factory_id, company_id, type, blanking_status, status
+    </sql>
+
+    <select id="getLastPreserve" parameterType="int" resultType="date">
+        select MAX(create_time) from pro_ingredient where plc_id=#{plcId}
+    </select>
+</mapper>

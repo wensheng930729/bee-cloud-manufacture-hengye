@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProOreFurnaceRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProOreFurnaceRecord">
+        <id column="id" property="id" />
+        <result column="furnace_id" property="furnaceId" />
+        <result column="furnace_name" property="furnaceName" />
+        <result column="shift" property="shift" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="create_id" property="createId" />
+        <result column="modify_id" property="modifyId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="company_id" property="companyId" />
+        <result column="onduty" property="onduty" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, furnace_id, furnace_name, shift, create_time, modify_time, create_id, modify_id, factory_id, company_id,
+         onduty, status
+    </sql>
+
+    <select id="findRecordsByCondition" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProOreFurnaceRecordQueryRQ"
+    resultType="com.bee.platform.cloud.si.manufacture.entity.ProOreFurnaceRecord">
+        select <include refid="Base_Column_List"/>
+        from pro_ore_furnace_record
+        where status = 1
+        <if test="furnaceId != null">
+            and furnace_id = #{furnaceId}
+        </if>
+        <if test="companyId != null">
+            and company_id = #{companyId}
+        </if>
+        <if test="factoryId != null">
+            and factory_id = #{factoryId}
+        </if>
+        <if test="shift != null">
+            and shift = #{shift}
+        </if>
+        <if test="onduty != null">
+            and onduty = #{onduty}
+        </if>
+        order by modify_time desc
+        limit 1
+    </select>
+
+</mapper>

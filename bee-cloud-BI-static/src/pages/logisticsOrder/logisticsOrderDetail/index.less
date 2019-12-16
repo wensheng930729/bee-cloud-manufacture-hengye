@@ -1,0 +1,37 @@
+@import '~@/utils/configs.less';
+
+.addBatchStyle {
+  :global {
+    .ant-btn-dashed {
+      width: 95%;
+      height: 50px;
+      margin-top: 5px;
+      margin-right: 2%;
+      margin-left: 2%;
+    }
+  }
+}
+
+.header {
+  background-color: white;
+  padding: 24px;
+  margin: 24px 32px;
+  margin-top: -24px;
+  .left {
+    .title {
+      font-size: @heading-3-size;
+      color: @heading-color;
+    }
+
+    .info {
+      line-height: @lineHeight-lg;
+      margin-top: @padding-sm;
+    }
+  }
+
+  .right {
+    position: absolute;
+    top: @padding-sm;
+    right: 30px;
+  }
+}

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.user.dao.mapper.AuthCustomerOrSupplierMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.user.entity.AuthCustomerOrSupplier">
+        <id column="id" property="id" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="name" property="name" />
+        <result column="telephone" property="telephone" />
+        <result column="address" property="address" />
+        <result column="mailbox" property="mailbox" />
+        <result column="category" property="category" />
+        <result column="status" property="status" />
+        <result column="type" property="type" />
+        <result column="related_contacts" property="relatedContacts" />
+        <result column="phone_number" property="phoneNumber" />
+        <result column="carrier" property="carrier" />
+        <result column="carrier_category" property="carrierCategory" />
+        <result column="bank_account" property="bankAccount" />
+        <result column="bank" property="bank" />
+        <result column="tax_number" property="taxNumber" />
+        <result column="billing_address" property="billingAddress" />
+        <result column="deleted" property="deleted" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, factory_id, name, telephone, address, mailbox, category, status, type, related_contacts, phone_number, carrier,carrier_category, bank_account, bank, tax_number, billing_address, deleted, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+</mapper>

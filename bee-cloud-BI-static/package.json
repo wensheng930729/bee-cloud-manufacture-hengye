@@ -1,0 +1,76 @@
+{
+  "name": "bee-BI",
+  "version": "1.0.0",
+  "description": "An out-of-box UI solution for enterprise applications",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env PORT=9090 NODE_ENV=dev umi dev",
+    "dev:test": "cross-env PORT=9090 WATCH_FILES=none BROWSER=none CLEAR_CONSOLE=none COMPILE_ON_DEMAND=none COVERAGE=true umi dev",
+    "test": "macaca run -d ./test --verbose",
+    "serve": "npm run dev:test &",
+    "build:pro": "cross-env BUILD_ENV=pro umi build",
+    "build:qa": "cross-env BUILD_ENV=qa umi build",
+    "build:qa1": "cross-env BUILD_ENV=qa1 umi build",
+    "build:scft": "cross-env BUILD_ENV=scft umi build",
+    "build:ss": "cross-env BUILD_ENV=ss umi build",
+    "build": "cross-env BUILD_ENV=dev umi build",
+    "build:test": "cross-env BUILD_ENV=test umi build",
+    "lint": "npm run lint:js && npm run lint:style && npm run lint:prettier",
+    "lint-staged": "lint-staged",
+    "lint-staged:js": "eslint --ext .js,.jsx,.ts,.tsx ",
+    "lint:fix": "eslint --fix --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src && npm run lint:style",
+    "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
+    "lint:prettier": "check-prettier lint",
+    "lint:style": "stylelint --fix \"src/**/*.less\" --syntax less",
+    "prettier": "prettier -c --write \"**/*\""
+  },
+  "dependencies": {
+    "@antv/data-set": "^0.8.9",
+    "@babel/polyfill": "^7.2.5",
+    "@babel/runtime": "^7.3.1",
+    "@umijs/fabric": "^1.2.1",
+    "antd": "^3.15.0",
+    "bizcharts": "^3.5.4",
+    "bizcharts-plugin-slider": "^2.0.1",
+    "dva": "^2.4.1",
+    "dva-model-extend": "^0.1.2",
+    "eslint-plugin-html": "^6.0.0",
+    "lodash": "^4.17.10",
+    "lodash-decorators": "^5.0.1",
+    "moment": "^2.22.1",
+    "path-to-regexp": "^1.7.0",
+    "prop-types": "^15.7.2",
+    "rc-drawer-menu": "^1.1.0",
+    "react": "^16.8.6",
+    "react-media": "^1.9.2",
+    "umi": "^2.8.11",
+    "umi-plugin-react": "1.8.4"
+  },
+  "devDependencies": {
+    "bizcharts-plugin-slider": "^2.0.1",
+    "check-prettier": "^1.0.3",
+    "cross-env": "^5.1.4",
+    "eslint": "5.16.0",
+    "husky": "^3.0.0",
+    "lint-staged": "^9.0.0",
+    "mockjs": "^1.0.1-beta3",
+    "numeral": "^2.0.6",
+    "prettier": "^1.17.1",
+    "react-fittext": "^1.0.0",
+    "stylelint": "^10.1.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.less": "stylelint --syntax less",
+    "**/*.{js,jsx,tsx,ts,less,md,json}": [
+      "prettier --write",
+      "git add"
+    ],
+    "**/*.{js,jsx}": "npm run lint-staged:js",
+    "**/*.{js,ts,tsx}": "npm run lint-staged:js"
+  }
+}

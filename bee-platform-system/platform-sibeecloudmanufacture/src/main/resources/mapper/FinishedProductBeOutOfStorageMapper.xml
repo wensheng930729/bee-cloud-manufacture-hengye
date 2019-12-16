@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.FinishedProductBeOutOfStorageMapper">
+
+
+    <select id="selectSaleOutStorageRecord"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.InAndOutStorageRecordDTO">
+        SELECT bs.modifier creator,date_format(bs.modify_time, '%Y-%m-%d') time,SUM(od.product_number) product_number,r.`name` storage_name
+        FROM finished_product_be_out_of_storage bs
+            JOIN finished_product_out_storage_detail od ON bs.contract_car_id = od.contract_car_id
+            JOIN finished_product_pending_storage ps ON od.ton_bag_number = ps.ton_bag_number
+            JOIN config_repository r ON ps.storage_id = r.id
+        WHERE bs.out_storage = 1 AND ps.product_id = #{productId} AND ps.storage_id = #{storageId} AND ps.product_spec_id = #{productSpecId}
+            GROUP BY bs.contract_id,bs.license_plate_number
+    </select>
+
+    <select id="selectByContractAndStorage"
+            resultType="com.bee.platform.cloud.si.manufacture.entity.FinishedProductBeOutOfStorage">
+        SELECT bs.* FROM finished_product_be_out_of_storage bs
+        JOIN finished_product_out_storage_detail sd ON bs.contract_car_id = sd.contract_car_id
+        JOIN finished_product_pending_storage ps ON sd.ton_bag_number = ps.ton_bag_number
+        WHERE
+        bs.contract_id = #{contractId} AND bs.out_storage = 1 AND ps.storage_id = #{storageId};
+    </select>
+    <select id="getStorageIdAndNameByTonCode" parameterType="string"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.StorageIdAndNameDTO">
+        SELECT
+            a.storage_id AS storageId,
+            b.`name` AS storageName
+        FROM
+            `finished_product_pending_storage` a
+            LEFT JOIN config_repository b ON a.storage_id = b.id
+        WHERE
+            a.`status` = 1
+            AND a.ton_bag_number = #{tonCode}
+    </select>
+
+    <select id="selectFreeOutByContractAndStorage"
+            resultType="com.bee.platform.cloud.si.manufacture.entity.FinishedProductBeOutOfStorage">
+        SELECT bs.* FROM finished_product_be_out_of_storage bs
+        INNER JOIN finished_product_free_out fo ON bs.contract_car_id = fo.contract_car_id
+        WHERE
+        bs.contract_id = #{contractId} AND fo.storage_id = #{storageId}
+    </select>
+
+
+    <select id="selectUnLoadContractCar" resultType="com.bee.platform.cloud.si.manufacture.dto.ContractCarDTO" parameterType="com.bee.platform.cloud.si.manufacture.rq.SaleOutOfStockSearchRQ">
+        SELECT
+            f.id,
+            f.contract_car_id AS contractCarId,
+            f.contract_id AS contractId,
+            s.customer_name AS customerName,
+            f.carrier_name AS carrierName,
+            f.license_plate_number AS licensePlateNumber,
+            f.product_id AS productId,
+            f.product_name AS productName,
+            f.product_number AS productNumber,
+            f.product_unit AS productUnit,
+            f.driver_name AS driverName,
+            f.contact
+        FROM
+            finished_product_be_out_of_storage f
+            INNER JOIN sale_contract_basic s ON f.contract_id = s.contract_num
+            WHERE 1=1
+            <if test="enterpriseId != null">
+                AND f.org_id=#{enterpriseId}
+            </if>
+            <if test="factoryId != null">
+                AND f.factory_id=#{factoryId}
+            </if>
+            AND f.`status`=1
+            AND f.out_storage=0
+            <if test="contractId != null and contractId != ''">
+                AND f.contract_id LIKE CONCAT('%',#{contractId},'%')
+            </if>
+            <if test="customerName != null and customerName != ''">
+                AND s.customer_name LIKE CONCAT('%',#{customerName},'%')
+            </if>
+            ORDER BY f.id DESC
+
+    </select>
+
+
+    <select id="searchSaleOutOfStockList" resultType="com.bee.platform.cloud.si.manufacture.dto.SaleOutOfStockDTO" parameterType="com.bee.platform.cloud.si.manufacture.rq.SaleOutOfStockSearchRQ">
+        SELECT
+        f.id,
+        f.contract_car_id AS contractCarId,
+        f.contract_id AS contractId,
+        s.customer_name AS customerName,
+        f.carrier_name AS carrierName,
+        f.license_plate_number AS licensePlateNumber,
+        f.driver_name AS driverName,
+        f.contact ,
+        f.modify_time AS modifyTime
+        FROM
+        finished_product_be_out_of_storage f
+        INNER JOIN sale_contract_basic s ON f.contract_id = s.contract_num
+        WHERE 1=1
+        <if test="enterpriseId != null">
+            AND f.org_id=#{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            AND f.factory_id=#{factoryId}
+        </if>
+        AND f.`status`=1
+        AND f.out_storage=1
+        <if test="contractId != null and contractId != ''">
+            AND f.contract_id LIKE CONCAT('%',#{contractId},'%')
+        </if>
+        <if test="customerName != null and customerName != ''">
+            AND s.customer_name LIKE CONCAT('%',#{customerName},'%')
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND f.create_time <![CDATA[>= ]]> #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND f.create_time <![CDATA[<= ]]> #{endTime}
+        </if>
+        ORDER BY f.id DESC
+    </select>
+
+</mapper>

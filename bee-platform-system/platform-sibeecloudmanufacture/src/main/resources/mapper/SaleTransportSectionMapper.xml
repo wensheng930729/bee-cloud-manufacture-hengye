@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.SaleTransportSectionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.SaleTransportSection">
+        <id column="id" property="id" />
+        <result column="batch_id" property="batchId" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="transport_section_id" property="transportSectionId" />
+        <result column="transport_section" property="transportSection" />
+        <result column="transport_section_name" property="transportSectionName" />
+        <result column="transport_mode" property="transportMode" />
+        <result column="to_factory" property="toFactory" />
+        <result column="starting_place_id" property="startingPlaceId" />
+        <result column="starting_place" property="startingPlace" />
+        <result column="arrival_place_id" property="arrivalPlaceId" />
+        <result column="arrival_place" property="arrivalPlace" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, batch_id, contract_business_id, transport_section_id, transport_section, transport_section_name,
+        transport_mode, to_factory, starting_place_id, starting_place, arrival_place_id, arrival_place, status,
+        create_id, creator, create_time, modify_id, modifier, modify_time, remark
+    </sql>
+
+</mapper>

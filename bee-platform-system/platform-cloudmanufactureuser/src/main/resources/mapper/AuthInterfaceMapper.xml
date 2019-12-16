@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.user.dao.mapper.AuthInterfaceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.user.entity.AuthInterface">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="type" property="type" />
+        <result column="sub_sys" property="subSys" />
+        <result column="order_num" property="orderNum" />
+        <result column="url" property="url" />
+        <result column="bee_router" property="beeRouter" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, type, sub_sys, order_num, url, bee_router, status, create_time, update_time, deleted
+    </sql>
+
+    <insert id="insertAll" parameterType="com.bee.platform.cloud.user.entity.AuthInterface">
+        insert  into  auth_interface ( id,`name`, `type`, sub_sys, order_num, url, bee_router, status, create_time, update_time, deleted)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=INTEGER},
+            #{item.name,jdbcType=VARCHAR},
+            #{item.type,jdbcType=VARCHAR},
+            #{item.subSys,jdbcType=VARCHAR},
+            #{item.orderNum,jdbcType=INTEGER},
+            #{item.url,jdbcType=VARCHAR},
+            #{item.beeRouter,jdbcType=VARCHAR},
+            #{item.status,jdbcType=INTEGER},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.deleted,jdbcType=TINYINT}
+            )
+        </foreach>
+    </insert>
+</mapper>

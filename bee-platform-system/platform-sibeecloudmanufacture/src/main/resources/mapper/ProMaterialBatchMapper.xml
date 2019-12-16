@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProMaterialBatchMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProMaterialBatch">
+        <id column="id" property="id" />
+        <result column="business_id" property="businessId" />
+        <result column="material_name" property="materialName" />
+        <result column="plc_id" property="plcId" />
+        <result column="plc_name" property="plcName" />
+        <result column="finish_product_id" property="finishProductId" />
+        <result column="finish_product_name" property="finishProductName" />
+        <result column="production_num" property="productionNum" />
+        <result column="finish_unit" property="finishUnit" />
+        <result column="active" property="active" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="create_id" property="createId" />
+        <result column="modify_id" property="modifyId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="company_id" property="companyId" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, business_id, material_name, plc_id, plc_name, finish_product_id, finish_product_name, finish_unit, production_num, active, create_time, modify_time, create_id, modify_id, factory_id, company_id, status
+    </sql>
+
+    <select id="findList" resultType="com.bee.platform.cloud.si.manufacture.dto.MaterialBatchDTO">
+        select pmb.id, pmb.material_name, pmb.plc_id, pmb.plc_name, pmb.finish_product_id,
+        pmb.finish_product_name, pmb.finish_unit, pmb.production_num, pmb.active, pmb.create_time
+        from pro_material_batch pmb
+        where pmb.status = 1
+        <if test="materialName != null">
+            and pmb.material_name like CONCAT('%',#{materialName},'%')
+        </if>
+        <if test="active != null">
+            and pmb.active = #{active}
+        </if>
+        <if test="finishProductName != null">
+            and pmb.finish_product_name like CONCAT('%',#{finishProductName},'%')
+        </if>
+        <if test="companyId != null">
+            and pmb.company_id = #{companyId}
+        </if>
+        <if test="factoryId != null">
+            and pmb.factory_id = #{factoryId}
+        </if>
+        <if test="startTime != null">
+            and pmb.create_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and pmb.create_time <![CDATA[<=]]> #{endTime}
+        </if>
+        order by pmb.create_time desc
+    </select>
+
+</mapper>

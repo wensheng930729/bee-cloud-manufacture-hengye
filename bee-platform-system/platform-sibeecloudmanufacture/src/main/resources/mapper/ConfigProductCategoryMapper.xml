@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ConfigProductCategoryMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ConfigProductCategory">
+        <id column="id" property="id" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="name" property="name" />
+        <result column="status" property="status" />
+        <result column="type" property="type" />
+        <result column="deleted" property="deleted" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, factory_id, name, status, type, deleted, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+
+    <select id="selectListByCondition" resultType="com.bee.platform.cloud.si.manufacture.dto.ConfigProductCategoryDTO" parameterType="com.bee.platform.cloud.si.manufacture.rq.ConfigProductCategorySearchRQ">
+        SELECT
+            id,
+            enterprise_id AS enterpriseId,
+            factory_id AS factoryId,
+            `name`,
+            `status`,
+            type
+        FROM
+            config_product_category pc
+        WHERE
+            1 = 1
+            <if test="name != null and name != ''">
+                AND pc.`name` LIKE  CONCAT('%',#{name},'%')
+            </if>
+            <if test="status != null">
+                AND pc.`status` = #{status}
+            </if>
+            AND pc.type = 0
+            AND pc.deleted = 0
+        UNION ALL
+        SELECT
+            id,
+            enterprise_id AS enterpriseId,
+            factory_id AS factoryId,
+            `name`,
+            `status`,
+            type
+        FROM
+            config_product_category pc
+        WHERE
+            1 = 1
+            <if test="enterpriseId != null">
+                AND pc.enterprise_id = #{enterpriseId}
+            </if>
+            <if test="factoryId != null">
+                AND pc.factory_id = #{factoryId}
+            </if>
+            <if test="name != null and name != ''">
+                AND pc.`name` LIKE  CONCAT('%',#{name},'%')
+            </if>
+            <if test="status != null">
+                AND pc.`status` = #{status}
+            </if>
+            AND pc.type = 1
+            AND pc.deleted = 0
+        ORDER BY
+            id
+    </select>
+
+</mapper>

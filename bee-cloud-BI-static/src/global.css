@@ -1,0 +1,109 @@
+html,
+body,
+:global(#root) {
+  background-color: #f9f9f9;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 100%;
+}
+
+.chineseMon {
+  position: absolute;
+  margin-top: -24px;
+  font-size: 12px;
+}
+
+.chineseMon3 {
+  margin-top: -24px;
+  font-size: 12px;
+}
+
+pre {
+  font-family: none !important;
+}
+
+.bill-modal-form .ant-form-item-label {
+  width: 120px;
+}
+
+.bill-modal-form .ant-form-item-control-wrapper {
+  flex: 0.8;
+}
+
+.timeWarning .ant-form-item-label label {
+  font-size: 1.17em;
+}
+
+.warningBox .ant-form-item {
+  margin-bottom: 0;
+}
+
+.warningItem .ant-form-item {
+  display: inline-block;
+}
+
+.warningCheckItem .ant-checkbox-wrapper {
+  padding-top: 5px;
+}
+
+.warningItem .ant-form-item-label {
+  display: inline-block !important;
+  padding-right: 10px;
+}
+
+.warningItem .ant-form-item-label label {
+  font-size: 14px;
+}
+
+.warningItem .ant-form-item-control-wrapper {
+  width: 70px;
+  display: inline-block;
+}
+
+.specialWarningItem .ant-form-item-control-wrapper .ant-form-explain {
+  width: 200px !important;
+}
+
+:global(.ant-layout) {
+  overflow-x: hidden !important;
+}
+
+.contractContent .ant-form-item {
+  width: 70% !important;
+}
+
+.contractContent .ant-form-item-control-wrapper {
+  width: 70% !important;
+}
+
+.contractContent .ant-form-explain {
+  width: 150% !important;
+}
+
+#toolbar {
+  display: none;
+}
+
+.ant-table-thead>tr>th,
+.ant-table-tbody>tr>td {
+  padding: 16px 10px;
+}
+
+.ant-statistic-content-value-decimal {
+  font-size: 14px !important;
+}
+
+
+/* g2tooltip 文字对齐样式 */
+.g2-tooltip-list li {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center
+}
+
+.g2-tooltip-list li .li-key {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

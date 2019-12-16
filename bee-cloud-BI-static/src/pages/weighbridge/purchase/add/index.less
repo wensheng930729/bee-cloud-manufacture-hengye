@@ -1,0 +1,35 @@
+.container {
+  margin: 24px 32px;
+
+  .formPart {
+    .partTitle {
+      font-weight: bold;
+      font-size: 14px;
+      color: #333333;
+    }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: flex-end;
+
+    button+button {
+      margin-left: 24px;
+    }
+  }
+
+  :global {
+    .ant-card-head-title {
+      font-weight: bold;
+    }
+
+    .ant-form {
+      display: flex;
+      flex-wrap: wrap;
+
+      .ant-form-item {
+        width: 33%;
+      }
+    }
+  }
+}

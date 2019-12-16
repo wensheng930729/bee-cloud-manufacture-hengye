@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProOreFurnaceRecordDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProOreFurnaceRecordDetail">
+        <id column="id" property="id" />
+        <result column="ore_record_id" property="oreRecordId" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="stir_furnace_record" property="stirFurnaceRecord" />
+        <result column="electrode" property="electrode" />
+        <result column="out_furnace_record" property="outFurnaceRecord" />
+        <result column="power_record" property="powerRecord" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, ore_record_id, create_time, modify_time, stir_furnace_record, electrode, out_furnace_record, power_record, status
+    </sql>
+
+    <select id="findPowerConsume" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnacePowerConsumeDTO">
+        select pofr.furnace_id, pofr.furnace_name,
+        <if test="timeRange != null">
+            <if test="timeRange == 1 or timeRange == 2">
+                DATE_FORMAT(pofr.create_time,'%Y-%m-%d') currentDate,
+            </if>
+            <if test="timeRange == 3">
+                DATE_FORMAT(pofr.create_time,'%Y-%m') currentDate,
+            </if>
+            <if test="timeRange == 4">
+                pofr.create_time currentDate,
+            </if>
+        </if>
+         sum(IFNULL( pofrd.power_consume, 0))powerConsume
+        from pro_ore_furnace_record pofr
+        left join pro_ore_furnace_record_detail pofrd on pofrd.ore_record_id = pofr.id and pofrd.status = 1
+        where pofr.status = 1
+        <if test="startTime != null">
+            and pofr.create_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and pofr.create_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="enterpriseId != null">
+            and pofr.company_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and pofr.factory_id = #{factoryId}
+        </if>
+        group by currentDate, pofr.furnace_id
+    </select>
+
+    <select id="findTotalPowerConsume" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnacePowerConsumeDTO">
+        select pofr.furnace_id, pofr.furnace_name,
+        sum(IFNULL( pofrd.power_consume, 0))powerConsume
+        from pro_ore_furnace_record pofr
+        left join pro_ore_furnace_record_detail pofrd on pofrd.ore_record_id = pofr.id and pofrd.status = 1
+        where pofr.status = 1
+        <if test="startTime != null">
+            and pofr.create_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and pofr.create_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="enterpriseId != null">
+            and pofr.company_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and pofr.factory_id = #{factoryId}
+        </if>
+        group by pofr.furnace_id
+    </select>
+
+</mapper>

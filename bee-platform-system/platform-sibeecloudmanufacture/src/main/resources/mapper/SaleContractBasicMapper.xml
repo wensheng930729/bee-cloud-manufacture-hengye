@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.SaleContractBasicMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.SaleContractBasic">
+        <id column="id" property="id"/>
+        <result column="contract_business_id" property="contractBusinessId"/>
+        <result column="contract_num" property="contractNum"/>
+        <result column="enterprise_id" property="enterpriseId"/>
+        <result column="factory_id" property="factoryId"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="customer_name" property="customerName"/>
+        <result column="sign_date" property="signDate"/>
+        <result column="delivery_date" property="deliveryDate"/>
+        <result column="address_id" property="addressId"/>
+        <result column="arrival_address" property="arrivalAddress"/>
+        <result column="product_id" property="productId"/>
+        <result column="product_name" property="productName"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="unit_value" property="unitValue"/>
+        <result column="unit_price" property="unitPrice"/>
+        <result column="quantity" property="quantity"/>
+        <result column="amount" property="amount"/>
+        <result column="sale_mode" property="saleMode"/>
+        <result column="amount_settlement_total" property="amountSettlementTotal"/>
+        <result column="amount_collection_total" property="amountCollectionTotal"/>
+        <result column="completed" property="completed"/>
+        <result column="link_man" property="linkMan"/>
+        <result column="link_phone" property="linkPhone"/>
+        <result column="confirm_part" property="confirmPart"/>
+        <result column="quality_requirement" property="qualityRequirement"/>
+        <result column="traffic_volume" property="trafficVolume"/>
+        <result column="received_volume" property="receivedVolume"/>
+        <result column="issued_volume" property="issuedVolume"/>
+        <result column="undelivered_volume" property="undeliveredVolume"/>
+        <result column="completed_volume" property="completedVolume"/>
+        <result column="sample_status" property="sampleStatus"/>
+        <result column="settle_status" property="settleStatus"/>
+        <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
+        <result column="type" property="type"/>
+        <result column="create_id" property="createId"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_id" property="modifyId"/>
+        <result column="modifier" property="modifier"/>
+        <result column="modify_time" property="modifyTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, contract_business_id, contract_num, enterprise_id, factory_id, customer_id, customer_name, sign_date, delivery_date,address_id,
+        arrival_address, product_id, product_name,category_id,category_name, unit_value, unit_price, quantity, amount, sale_mode,
+        amount_settlement_total,amount_collection_total, completed, link_man, link_phone, confirm_part, quality_requirement, traffic_volume,
+        received_volume,completed_volume, sample_status, settle_status, status, remark,type, create_id, creator,
+        create_time, modify_id, modifier, modify_time, issued_volume, undelivered_volume
+    </sql>
+
+    <select id="getSaleMoney" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SaleMoneyRatioDTO">
+        SELECT
+        a.customer_id AS customerId,
+        a.customer_name AS customerName,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        IFNULL(SUM(a.amount),0) AS money
+        FROM
+        sale_contract_basic a
+        WHERE 1=1
+        AND a.`status` =1
+        AND a.enterprise_id = #{enterpriseId}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        <if test="categoryId!=null">
+            AND a.category_id=#{categoryId}
+        </if>
+        AND a.sign_date BETWEEN #{startTime} AND #{endTime}
+        GROUP BY
+        a.customer_id;
+    </select>
+
+
+    <select id="getSaleMoneyBack" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SaleMoneyRatioDTO">
+        SELECT
+        a.customer_id AS customerId,
+        a.customer_name AS customerName,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        IFNULL(SUM(a.amount_collection_total),0) AS money
+        FROM
+        sale_contract_basic a
+        WHERE 1=1
+        AND a.`status` =1
+        AND a.enterprise_id = #{enterpriseId}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        <if test="categoryId!=null">
+            AND a.category_id=#{categoryId}
+        </if>
+        AND a.sign_date BETWEEN #{startTime} AND #{endTime}
+        GROUP BY
+        a.customer_id;
+    </select>
+    
+    <select id="getUnfinishedFinance" parameterType="map" resultType="com.bee.platform.cloud.si.manufacture.dto.UnfinishedFinanceDTO">
+	SELECT    
+		product_id as itemId,
+		product_name as item,
+		SUM(IFNULL(amount_collection_total,0)) as already,
+		SUM(
+			IF (
+				IFNULL(quantity,0) * IFNULL(unit_price,0) - IFNULL(amount_collection_total,0) > 0,
+				IFNULL(quantity,0) * IFNULL(unit_price,0) - IFNULL(amount_collection_total,0),
+	      0
+			)
+		) as should,
+	  SUM(
+	    IF(
+	      IFNULL(quantity,0) * IFNULL(unit_price,0) - IFNULL(amount_collection_total,0) > 0,
+	      0,
+	      IFNULL(amount_collection_total,0) - IFNULL(quantity,0) * IFNULL(unit_price,0)
+	    )
+	  ) as expect
+	 FROM sale_contract_basic
+		WHERE
+		  completed = 0
+		  and status = 1
+		  and enterprise_id = #{enterpriseId}
+		  and factory_id = #{factory_id}
+		  and category_id = #{categoryId}
+		GROUP BY
+		  product_id
+	</select>
+	
+	    <select id="getSupplierUnfinishedFinance" parameterType="map" resultType="com.bee.platform.cloud.si.manufacture.dto.UnfinishedFinanceDTO">
+	SELECT    
+		customer_id as itemId,
+		customer_name as item,
+		SUM(IFNULL(amount_collection_total,0)) as already,
+		SUM(
+			IF (
+				IFNULL(quantity,0) * IFNULL(unit_price,0) - IFNULL(amount_collection_total,0) > 0,
+				IFNULL(quantity,0) * IFNULL(unit_price,0) - IFNULL(amount_collection_total,0),
+	      0
+			)
+		) as should,
+	  SUM(
+	    IF(
+	      IFNULL(quantity,0) * IFNULL(unit_price,0) - IFNULL(amount_collection_total,0) > 0,
+	      0,
+	      IFNULL(amount_collection_total,0) - IFNULL(quantity,0) * IFNULL(unit_price,0)
+	    )
+	  ) as expect
+	 FROM sale_contract_basic
+		WHERE
+		  completed = 0
+		  and status = 1
+		  and enterprise_id = #{enterpriseId}
+		  and factory_id = #{factory_id}
+		GROUP BY
+		  customer_id
+	</select>
+	
+	<select id="getSupplierUnfinishedGoods" parameterType="map" resultType="com.bee.platform.cloud.si.manufacture.dto.UnfinishedGoodsDTO">
+	SELECT    
+		customer_id as itemId,
+		customer_name as item,
+		SUM(IFNULL(received_volume,0)) as already,
+		SUM(IFNULL(quantity,0) - IFNULL(received_volume,0)) as incomplete
+	 FROM sale_contract_basic
+		WHERE
+		  completed = 0
+		  and status = 1
+		  and enterprise_id = #{enterpriseId}
+		  and factory_id = #{factoryId}
+		  AND sign_date BETWEEN #{startTime} AND #{endTime}
+		GROUP BY
+		  customer_id
+	</select>
+	
+	<select id="getUnfinishedGoods" parameterType="map" resultType="com.bee.platform.cloud.si.manufacture.dto.UnfinishedGoodsDTO">
+	SELECT    
+		product_id as itemId,
+		product_name as item,
+		SUM(IFNULL(received_volume,0)) as already,
+		SUM(IFNULL(quantity,0) - IFNULL(received_volume,0)) as incomplete
+	 FROM sale_contract_basic
+		WHERE
+		  completed = 0
+		  and status = 1
+		  and enterprise_id = #{enterpriseId}
+		  and factory_id = #{factoryId}
+		  and category_id = #{categoryId}
+		  AND sign_date BETWEEN #{startTime} AND #{endTime}
+		GROUP BY
+		  product_id
+	</select>
+    <select id="getDataScreen" parameterType="map" resultType="decimal">
+        SELECT
+        IFNULL(SUM(a.amount),0)  AS amount
+        FROM
+        sale_contract_basic a
+        WHERE 1=1
+	    AND a.sign_date LIKE CONCAT(#{paramDate},'%')
+	    AND a.enterprise_id = #{enterpriseId}
+	    AND a.factory_id = #{factoryId}
+	    AND a.`status` = 1
+    </select>
+</mapper>

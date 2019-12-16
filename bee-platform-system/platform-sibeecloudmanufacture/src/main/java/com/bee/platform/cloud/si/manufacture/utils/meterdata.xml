@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <root>
+        <common>
+            <building_id>kdsg_001</building_id><!-- 楼栋号 -->
+            <gateway_id>kdg_001</gateway_id> <!-- 网关号 -->
+            <type>report</type>
+        </common>
+        <data operation="report">
+            <sequence>5</sequence>
+            <parser>parser</parser>
+            <time>20191025102326</time> <!--采集时间-->
+            <meter id="device1_1"><!--设备标识-->
+                <function id="1" coding="yc-001" error="0">0.00</function><!--字段名 值-->
+                <function id="2" coding="yc-002" error="0">22.50</function>
+                <function id="3" coding="yc-003" error="0">1.00</function>
+                <function id="4" coding="yc-004" error="0">20.00</function>
+                <function id="5" coding="yc-005" error="0">4.00</function>
+                <function id="6" coding="yc-006" error="0">4.00</function>
+                <function id="7" coding="yc-007" error="0">0.00</function>
+                <function id="8" coding="yc-008" error="0">0.00</function>
+            </meter>
+        </data>
+    </root>

@@ -1,0 +1,35 @@
+.container {
+  min-height: 580px;
+
+  .btnBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  :global {
+    .ant-form {
+      display: flex;
+      flex-wrap: wrap;
+
+      &>div {
+        margin-bottom: 20px;
+        margin-right: 24px;
+      }
+    }
+
+    .ant-table-wrapper {
+      margin-top: 24px;
+
+      th {
+        font-weight: bold;
+        background-color: #f0f2f5;
+      }
+
+      th,
+      td {
+        text-align: center;
+      }
+    }
+  }
+}

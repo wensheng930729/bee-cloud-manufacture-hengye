@@ -1,0 +1,28 @@
+@import '~@/utils/configs.less';
+
+.container {
+  background-color: @component-background;
+
+  .item {
+    display: flex;
+    justify-items: flex-start;
+    align-items: center;
+    margin-bottom: 10px;
+
+    span {
+      margin-left: 12px;
+      color: #1890ff;
+      cursor: pointer;
+    }
+  }
+
+  :global {
+    .ant-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+    }
+  }
+}

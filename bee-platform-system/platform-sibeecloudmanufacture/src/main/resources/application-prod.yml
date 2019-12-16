@@ -1,0 +1,171 @@
+# 配置mybatis-plus
+mybatis-plus:
+  # 配置扫描xml
+  mapper-locations:
+    - classpath*:mapper/*.xml
+  type-handlers-package: com.bee.platform.cloud.si.manufacture.config.handler.mybatis
+  # 实体扫描，多个package用逗号或者分号分隔
+  type-aliases-package: com.bee.platform.cloud.si.manufacture.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    idType: 0
+    # 逻辑删除配置
+    logic-delete-value: 0
+    logic-not-delete-value: 1
+    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+
+spring:
+    profiles: prod    #环境标识
+    main:
+      allow-bean-definition-overriding: true
+    application: 
+        name: platform-sibeecloudmanufacture
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        platform: mysql
+        url: jdbc:mysql://192.168.1.229:3306/si_cloudmanufacture?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&serverTimezone=GMT%2b8&useSSL=true&verifyServerCertificate=false
+        username: bee
+        password: Rhty@007
+        druid:
+            initial-size: 5    #初始化连接的数量
+            max-active: 200    #最大活跃连接数量
+            min-idle: 5    #连接池中连接的最小连接数量
+            max-wait: 60000    #获取连接时最大等待时间，单位毫秒。配置了maxWait之后，缺省启用公平锁，并发效率会有所下降，如果需要可以通过配置useUnfairLock属性为true使用非公平锁。
+            time-between-eviction-runs-millis: 60000    #有两个含义：1) Destroy线程会检测连接的间隔时间，如果连接空闲时间大于等于minEvictableIdleTimeMillis则关闭物理连接  2) testWhileIdle的判断依据。
+            min-evictable-idle-time-millis: 300000    #连接保持空闲而不被驱逐的最长时间
+            validation-query: SELECT 1    #用来检测连接是否有效的sql，要求是一个查询语句。如果validationQuery为null，testOnBorrow、testOnReturn、testWhileIdle都不会起作用
+            test-while-idle: true    #建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测，如果空闲时间大于timeetweenEvictionRunsMillis，执行validationQuery检测连接是否有效
+            test-on-borrow: false    #申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+            test-on-return: false    #归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+            filter:
+                stat:
+                    slow-sql-millis: 1000
+                    enabled: true
+                    log-slow-sql: true
+                    merge-sql: true
+    elasticsearch:
+      jest:
+        uris: http://192.168.1.56:9200,http://192.168.1.12:9200,http://192.168.1.201:9200
+    data:
+      elasticsearch:
+        cluster-name: internetofthings-cluster
+        cluster-nodes: 192.168.1.56:9300,192.168.1.12:9300,192.168.1.201:9300
+    redis:  
+        host: 192.168.1.229
+        port: 6379
+        password:
+        timeout: 10000 
+        jedis:
+          pool:
+            max-active: 200
+            max-wait: -1
+            max-idle: 8
+            min-idle: 0
+        
+    servlet:
+        multipart:
+            max-file-size: 100MB #最大支持文件大小
+            max-request-size: 100MB # 最大支持请求大小
+
+    jackson:
+        date-format: yyyy-MM-dd HH:mm:ss
+        time-zone: GMT+8
+        default-property-inclusion: non_null
+        deserialization:
+            adjust_dates_to_context_time_zone: true
+    
+#druid数据源的监控用户名和密码
+druid:
+  monitor:
+    loginUsername: admin
+    loginPassword: 123456
+    
+#日志
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    com.bee.platform.cloud.si.manufacture.dao.mapper: info     # 打印sql
+
+###注意：springcloud feign 请求超时处理：高版本的springcloud-openfeign请求分为两层，先ribbon控制，后hystrix控制，hystrix默认处于关闭状态###
+#ribbon的超时时间配置
+ribbon:
+  ConnectTimeout: 8000    #ribbon的请求连接的超时时间
+  ReadTimeout: 60000    #ribbon的请求处理的超时时间 
+
+#打开feign-hystrix
+feign:
+  hystrix:
+    enabled: true
+  client: 
+    config:
+      default:
+        connectTimeout: 8000    #feign的请求连接的超时时间，修改配置为8s
+        readTimeout: 10000    #feign的请求处理的超时时间，修改配置为10s
+
+#hystrix 超时时间配置
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true    #如果enabled设置为false，则请求超时交给ribbon控制
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000    #熔断器hystrix默认的超时时间是1s，所有是远远不够的，修改配置为10s
+
+#网关地址
+api-gateway:
+  remote-addr: http://sibeecloudmanufacture.beesrv.com
+  
+#模块地址
+platform-cloudmanufactureuser:
+  remote-addr: ${api-gateway.remote-addr}
+  
+platform-sibeecloudmanufacture:
+  remote-addr: ${api-gateway.remote-addr}
+
+#腾讯云文件服务器相关配置
+qcloud:
+  cos:
+    appId: 1252637635
+    secretId: AKIDiDTTEjhzjEUYO2seYDckccOvBBuN2YFk
+    secretKey: NVO1NTIsCG3arrb5KJ2UheaGhsmQowKS
+    bucketName: beesrv
+    
+bee:
+  common:
+    auth:
+      switch-on: false
+      address: http://sibeecloudmanufacture.beesrv.com
+      
+#springboot内嵌tomcat参数优化：也就是说并发的请求数量超过(accept-count + max-threads)后拒绝处理
+server:
+   tomcat:
+     accept-count: 1000    #等待队列的长度,默认是100,4C/8G的服务器设置为1000
+     max-connections: 10000    #最大连接数，默认是10000
+     max-threads: 800    #最大工作线程数，默认是200,4C/8G的服务器配置设置为800
+     min-spare-threads: 100    #最小工作线程数,默认是10,4C/8G的服务器配置设置为100
+     keepAliveTimeout: 30000    #长连接属性：定制化keepalivetimeout,设置30秒内没有请求则服务端自动断开keepalive链接
+     maxKeepAliveRequests: 10000    #长连接属性：当客户端发送超过10000个请求则自动断开keepalive链接
+     accesslog:
+       enabled: true    #Tomcat访问日志开关
+       pattern: '%h %l %u %t %r %s %b %D'    #Tomcat访问日志格式
+       directory: /data/application/springcloud_servers/${spring.application.name}
+
+code:
+  random: "028"
+  codeLength: 13
+
+#MQTT
+mqtt:
+  host: tcp://192.168.1.214:1883
+  clientId: beeCloudMake_mqtt_client_prod
+  userName: admin
+  password: Hjhw@4145Lthy_
+  keepAlive: 20
+  #华辰智通
+  hignton:
+    subsribeTopic: GateWayData   #订阅的主题
+    pushTopic: IotCloudData   #发送给华辰智通网关的主题

@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.BuySampleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.BuySample">
+        <id column="id" property="id"/>
+        <result column="enterprise_id" property="enterpriseId"/>
+        <result column="factory_id" property="factoryId"/>
+        <result column="contract_business_id" property="contractBusinessId"/>
+        <result column="sample_code" property="sampleCode"/>
+        <result column="product_id" property="productId"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_spec_id" property="productSpecId"/>
+        <result column="product_spec_name" property="productSpecName"/>
+        <result column="weight_date" property="weightDate"/>
+        <result column="weight_time" property="weightTime"/>
+        <result column="assay_status" property="assayStatus"/>
+        <result column="assay_result" property="assayResult"/>
+        <result column="assay_id" property="assayId"/>
+        <result column="assay_person" property="assayPerson"/>
+        <result column="assay_time" property="assayTime"/>
+        <result column="quality_exam_status" property="qualityExamStatus"/>
+        <result column="abandon_reason" property="abandonReason"/>
+        <result column="abandon_id" property="abandonId"/>
+        <result column="abandon_person" property="abandonPerson"/>
+        <result column="abandon_time" property="abandonTime"/>
+        <result column="status" property="status"/>
+        <result column="create_id" property="createId"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_id" property="modifyId"/>
+        <result column="modifier" property="modifier"/>
+        <result column="modify_time" property="modifyTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, factory_id, contract_num,sample_code,product_id,product_name,product_spec_id,product_spec_name,weight_date,weight_time, assay_status, assay_result,assay_id,assay_person, assay_time, quality_exam_status, abandon_reason,abandon_id,abandon_person,abandon_time,status, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+    <select id="getAssayingAndPrepareList" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SampleAssayPrepareAndAssayingDTO">
+        SELECT
+        1 AS businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.create_time AS sampleTime
+        FROM
+        buy_sample a
+        WHERE 1=1
+        and a.`status` = 1
+        and a.enterprise_id = #{enterpriseId}
+        and a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        2 AS businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.create_time AS sampleTime
+        FROM
+        sale_sample a
+        WHERE 1=1
+        AND a.`status` =1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        3 AS businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.create_time AS sampleTime
+        FROM
+        pro_sample a
+        WHERE 1=1
+        AND a.`status` =1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        ORDER BY sampleTime DESC
+    </select>
+
+    <select id="getAssayAbandonList" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SampleAssayAbandonDTO">
+        SELECT
+        1 as businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.create_time AS sampleTime,
+        a.product_name AS productName,
+        a.abandon_time AS abandonTime,
+        a.abandon_reason AS abandonReason,
+        a.abandon_id AS abandonId,
+        a.abandon_person AS abandonPerson
+        FROM
+        buy_sample a
+        WHERE 1=1
+        AND a.`status` = 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        2 as businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.create_time AS sampleTime,
+        a.product_name AS productName,
+        a.abandon_time AS abandonTime,
+        a.abandon_reason AS abandonReason,
+        a.abandon_id AS abandonId,
+        a.abandon_person AS abandonPerson
+        FROM
+        sale_sample a
+        WHERE 1=1
+        AND a.`status` = 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        3 as businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.create_time AS sampleTime,
+        a.product_name AS productName,
+        a.abandon_time AS abandonTime,
+        a.abandon_reason AS abandonReason,
+        a.abandon_id AS abandonId,
+        a.abandon_person AS abandonPerson
+        FROM
+        pro_sample a
+        WHERE 1=1
+        AND a.`status` = 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        ORDER BY abandonTime DESC
+    </select>
+
+    <select id="getAssayAlreadyList" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.SampleAssayAlreadyDTO">
+        SELECT
+        1 as businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.create_time AS sampleTime,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.product_spec_id AS productSpecId,
+        a.product_spec_name AS productSpecName,
+        a.assay_time AS assayTime
+        FROM
+        buy_sample a
+        WHERE 1=1
+        AND a.`status` = 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        2 as businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.create_time AS sampleTime,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.product_spec_id AS productSpecId,
+        a.product_spec_name AS productSpecName,
+        a.assay_time AS assayTime
+        FROM
+        sale_sample a
+        WHERE 1=1
+        AND a.`status` = 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        UNION ALL
+        SELECT
+        3 as businessType,
+        a.assay_status AS assayStatus,
+        a.sample_code AS sampleCode,
+        a.create_time AS sampleTime,
+        a.product_id AS productId,
+        a.product_name AS productName,
+        a.product_spec_id AS productSpecId,
+        a.product_spec_name AS productSpecName,
+        a.assay_time AS assayTime
+        FROM
+        pro_sample a
+        WHERE 1=1
+        AND a.`status` = 1
+        AND a.enterprise_id = #{enterpriseId}
+        AND a.assay_status = #{assayStatus}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+        ORDER BY assayTime DESC
+    </select>
+
+    <select id="selectSampleByMachineId" resultType="com.bee.platform.cloud.si.manufacture.entity.BuySample">
+		SELECT s.* FROM buy_sample s
+		JOIN buy_sample_weight_relation wr ON s.sample_code = wr.sample_code
+		WHERE
+		wr.machine_id = #{machineId} ORDER BY s.assay_time
+	</select>
+
+    <select id="getSampleInfoINOutFactory" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ReportFormTestQualityTestDTO">
+        SELECT
+            CONCAT(bs.sample_code,bwm.id) AS id,
+            bs.sample_code AS sampleCode,
+            1 AS businessType,
+            bs.product_name AS productName,
+            bs.assay_person AS assayPerson,
+            bs.assay_time AS assayTime,
+            bs.assay_result as assayResultInt,
+            bwm.machine_id AS machineId,
+            bwm.train_number AS trainNumber
+        FROM
+            buy_sample bs
+        LEFT JOIN config_product cp ON bs.product_id = cp.id
+        LEFT JOIN buy_weight_machine bwm ON bs.contract_business_id = bwm.contract_business_id
+        WHERE
+        1 =1
+        <if test="sampleCode != null and sampleCode != ''">
+            AND bs.sample_code like concat('%',#{sampleCode},'%')
+        </if>
+        <if test="productId != null and productId != ''">
+            AND bs.product_id = #{productId}
+        </if>
+        <if test="categoryId != null">
+            AND cp.category_id = #{categoryId}
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            AND bs.assay_time <![CDATA[<= ]]> #{endTime}
+            AND bs.assay_time <![CDATA[>= ]]> #{startTime}
+        </if>
+        <if test="enterpriseId != null">
+            AND bs.enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            AND bs.factory_id = #{factoryId}
+        </if>
+        <if test="status != null">
+            AND bs.status = #{status}
+        </if>
+        <if test="assayStatus != null">
+            AND bs.assay_status != #{assayStatus}
+        </if>
+        UNION ALL
+        SELECT
+            CONCAT(ss.sample_code,swm.id) AS id,
+            ss.sample_code AS sampleCode,
+            2 AS businessType,
+            ss.product_name AS productName,
+            ss.assay_person AS assayPerson,
+            ss.assay_time AS assayTime,
+            null as assayResultInt,
+            swm.machine_id AS machineId,
+            swm.train_number AS trainNumber
+
+        FROM
+            sale_sample ss
+        LEFT JOIN config_product cp ON ss.product_id = cp.id
+        LEFT JOIN sale_weight_machine swm ON ss.contract_business_id = swm.contract_business_id
+        WHERE
+        1 =1
+        <if test="sampleCode != null and sampleCode != ''">
+            AND ss.sample_code like concat('%',#{sampleCode},'%')
+        </if>
+        <if test="productId != null and productId != ''">
+            AND ss.product_id = #{productId}
+        </if>
+        <if test="categoryId != null">
+            AND cp.category_id = #{categoryId}
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            AND ss.assay_time <![CDATA[<= ]]> #{endTime}
+            AND ss.assay_time <![CDATA[>= ]]> #{startTime}
+        </if>
+        <if test="enterpriseId != null">
+            AND ss.enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            AND ss.factory_id = #{factoryId}
+        </if>
+        <if test="status != null">
+            AND ss.status = #{status}
+        </if>
+        <if test="assayStatus != null">
+            AND ss.assay_status != #{assayStatus}
+        </if>
+        ORDER BY assayTime DESC
+    </select>
+</mapper>

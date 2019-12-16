@@ -1,0 +1,19 @@
+/node_modules
+/src/pages/.umi
+/src/pages/.umi-production
+/.vscode
+# /dist
+
+package-lock.json
+yarn.lock
+
+npm-debug.log*
+yarn-error.log
+**/*.less.rej
+
+.eslintcache
+
+index.less.rej
+/*.babelrc
+
+.idea/

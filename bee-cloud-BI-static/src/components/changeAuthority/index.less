@@ -1,0 +1,67 @@
+@import '~antd/lib/style/themes/default.less';
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  height: 100%;
+
+  .content {
+    width: 779px;
+    min-height: 487px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 20px;
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      width: 100%;
+      height: 80%;
+      padding: 50px 0 30px 7px;
+
+      :global(.ant-btn) {
+        width: 100%;
+        height: 40px;
+        margin-top: 20px;
+        line-height: 40px;
+        border-color: #108ee9;
+
+        span {
+          color: #108ee9;
+          font-weight: 700;
+          font-size: 16px;
+          font-style: normal;
+          line-height: 24px;
+          white-space: initial;
+          text-align: center;
+        }
+
+        i {
+          position: absolute;
+          top: 5px;
+          right: 10px;
+          color: #52c41a;
+        }
+      }
+    }
+
+    .into {
+      width: 100%;
+      text-align: center;
+
+      :global(.ant-btn) {
+        width: 89px;
+        height: 32px;
+      }
+    }
+
+    .header {
+      padding-top: 20px;
+      font-size: 16px;
+      text-align: center;
+    }
+  }
+}

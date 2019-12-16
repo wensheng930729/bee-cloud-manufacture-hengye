@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ConfigOpeningInventoryOrderDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ConfigOpeningInventoryOrderDetail">
+        <id column="id" property="id" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="opening_inventory_order_id" property="openingInventoryOrderId" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="repository_id" property="repositoryId" />
+        <result column="repository_name" property="repositoryName" />
+        <result column="unit" property="unit" />
+        <result column="test_result" property="testResult" />
+        <result column="quantity" property="quantity" />
+        <result column="price" property="price" />
+        <result column="money" property="money" />
+        <result column="deleted" property="deleted" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, factory_id, opening_inventory_order_id, product_id, product_name,product_spec_id,product_spec_name, repository_id, repository_name, unit, test_result, quantity, price, money, deleted, create_id, creator, create_time, modify_id, modifier, modify_time
+    </sql>
+
+</mapper>

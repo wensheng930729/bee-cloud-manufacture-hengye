@@ -1,0 +1,9 @@
+# 服务的端口
+server:
+   port: 9900
+   
+spring:
+    profiles: 
+        active: dev    #默认激活环境配置
+    main:
+      allow-bean-definition-overriding: true

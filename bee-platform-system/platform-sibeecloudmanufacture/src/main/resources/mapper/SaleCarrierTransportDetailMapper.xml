@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.SaleCarrierTransportDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.SaleCarrierTransportDetail">
+        <id column="id" property="id" />
+        <result column="batch_id" property="batchId" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="transport_section_id" property="transportSectionId" />
+        <result column="carrier_transport_id" property="carrierTransportId" />
+        <result column="carrier_transport_detail_id" property="carrierTransportDetailId" />
+        <result column="transport_mode" property="transportMode" />
+        <result column="train_number" property="trainNumber" />
+        <result column="driver" property="driver" />
+        <result column="contact" property="contact" />
+        <result column="cargo_weight" property="cargoWeight" />
+        <result column="arrival_status" property="arrivalStatus" />
+        <result column="assay_result" property="assayResult" />
+        <result column="discount_unit_price" property="discountUnitPrice" />
+        <result column="handle_type" property="handleType" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, batch_id, contract_business_id, transport_section_id, carrier_transport_id, carrier_transport_detail_id,
+        transport_mode, train_number, driver, contact, cargo_weight, arrival_status, assay_result, discount_unit_price,
+        status, handle_type, create_id, creator, create_time, modify_id, modifier, modify_time, remark
+    </sql>
+
+    <!-- 查询批次中第一段的汽运车辆信息 -->
+    <select id="getFirstSectionCarInfo" resultMap="BaseResultMap">
+        select ctd.* from sale_transport_section ts inner join sale_carrier_transport_detail ctd
+          on ts.transport_section_id = ctd.transport_section_id
+        where ts.status = '1' and ctd.status = '1' and ctd.batch_id = #{batchId}
+    </select>
+
+    <!-- 查询批次中到厂的车辆信息 -->
+    <select id="selectVolumeByTransportSection" resultType="java.math.BigDecimal">
+        select sum(ifnull(t.cargo_weight, 0)) from sale_carrier_transport_detail t
+        where t.transport_section_id = #{transportSectionId} and t.status = '1'
+    </select>
+
+    <!-- 查询合同下的到货总数量 -->
+    <select id="selectVolumeByContract" resultType="java.math.BigDecimal">
+        select sum(ifnull(t.cargo_weight, 0)) from sale_carrier_transport_detail t
+        where t.contract_business_id = #{contractBusinessId} and t.status = '1'
+          and t.arrival_status = '1'
+    </select>
+
+    <!-- 查询批次下的到厂车辆信息 -->
+    <select id="getToFactoryCarInfo" resultMap="BaseResultMap">
+        select d.* from sale_carrier_transport t inner join sale_carrier_transport_detail d
+          on t.carrier_transport_id = d.carrier_transport_id
+        where d.batch_id = #{batchId} and t.to_factory = '1' and t.status = '1' and d.status = '1'
+    </select>
+
+    <!-- 查询批次下未到货的到厂车辆信息 -->
+    <select id="getNotArrivalToFactoryCarInfo" resultMap="BaseResultMap">
+        select d.* from sale_carrier_transport t inner join sale_carrier_transport_detail d
+          on t.carrier_transport_id = d.carrier_transport_id
+        where d.contract_business_id = #{contractBusinessId} and t.to_factory = '1' and t.status = '1' and d.status = '1'
+          and d.arrival_status = '0'
+    </select>
+    
+        <!-- 查询合同下车辆信息 -->
+    <select id="getCarList" resultMap="BaseResultMap">
+        select d.* from sale_carrier_transport t inner join sale_carrier_transport_detail d
+          on t.carrier_transport_id = d.carrier_transport_id
+        where d.contract_business_id = #{contractBusinessId} and t.to_factory = '1' and t.status = '1' and d.status = '1'
+    </select>
+
+</mapper>

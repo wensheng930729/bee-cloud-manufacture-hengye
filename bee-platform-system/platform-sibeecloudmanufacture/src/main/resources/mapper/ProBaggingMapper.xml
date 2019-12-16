@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProBaggingMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProBagging">
+        <id column="id" property="id"/>
+        <result column="enterprise_id" property="enterpriseId"/>
+        <result column="factory_id" property="factoryId"/>
+        <result column="bagging_code" property="baggingCode"/>
+        <result column="sample_code" property="sampleCode"/>
+        <result column="product_id" property="productId"/>
+        <result column="product_name" property="productName"/>
+        <result column="furnace_id" property="furnaceId"/>
+        <result column="furnace_name" property="furnaceName"/>
+        <result column="shift_code" property="shiftCode"/>
+        <result column="shift" property="shift"/>
+        <result column="shift_time" property="shiftTime"/>
+        <result column="furnace_batch_code" property="furnaceBatchCode"/>
+        <result column="furnace_batch" property="furnaceBatch"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="amount" property="amount"/>
+        <result column="status" property="status"/>
+        <result column="create_id" property="createId"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_id" property="modifyId"/>
+        <result column="modifier" property="modifier"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="product_spec_id" property="productSpecId"/>
+        <result column="product_spec_name" property="productSpecName"/>
+        <result column="step" property="step"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id,factory_id,bagging_code, sample_code, product_id,
+        product_name, furnace_id, furnace_name, shift_code,
+        shift, shift_time, furnace_batch_code, furnace_batch,
+        device_id, amount, status, create_id, creator, create_time,
+        modify_id, modifier, modify_time,product_spec_id,product_spec_name
+    </sql>
+
+
+    <select id="getBaggingResults" parameterType="int"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProBaggingDTO">
+    SELECT
+        product_id AS productId,
+        product_name AS productName,
+        furnace_id AS furnaceId,
+        furnace_name AS furnaceName,
+        shift_code AS shiftCode,
+        shift,
+        shift_time AS shiftTime,
+        furnace_batch_code AS furnaceBatchCode,
+        furnace_batch AS furnaceBatch,
+        SUM(amount) AS totalAmount,
+        create_time AS baggingDate,
+        product_spec_id AS productSpecId,
+        product_spec_name AS productSpecName
+    FROM
+        pro_bagging
+    WHERE
+        enterprise_id= #{enterpriseId}
+        AND status = 1
+    GROUP BY
+        furnace_id,
+        shift_code,
+        shift_time,
+        furnace_batch_code
+    ORDER BY create_time desc
+    </select>
+
+    <select id="findProduction" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnaceProductionDetailDTO">
+        select furnace_id, furnace_name, sum(amount) amount,
+        <if test="timeRange != null">
+            <if test="timeRange == 1 or timeRange == 2">
+                DATE_FORMAT(shift_time,'%Y-%m-%d') currentDate,
+            </if>
+            <if test="timeRange == 3">
+                DATE_FORMAT(shift_time,'%Y-%m') currentDate,
+            </if>
+            <if test="timeRange == 4">
+                shift_time currentDate,
+            </if>
+        </if>
+        product_id, product_name
+        from pro_bagging
+        where status = 1
+        <if test="startTime != null">
+            and shift_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and shift_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="productId != null">
+            and product_id = #{productId}
+        </if>
+        <if test="enterpriseId != null">
+            and enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and factory_id = #{factoryId}
+        </if>
+        group by currentDate, furnace_id
+    </select>
+
+    <select id="findProductSpecs" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnaceProductionDetailDTO">
+        select furnace_id, furnace_name, sum(amount) amount,
+        <if test="timeRange != null">
+            <if test="timeRange == 1 or timeRange == 2">
+                DATE_FORMAT(shift_time,'%Y-%m-%d') currentDate,
+            </if>
+            <if test="timeRange == 3">
+                DATE_FORMAT(shift_time,'%Y-%m') currentDate,
+            </if>
+            <if test="timeRange == 4">
+                shift_time currentDate,
+            </if>
+        </if>
+        product_id, product_name, product_spec_id, product_spec_name
+        from pro_bagging
+        where status = 1
+        <if test="startTime != null">
+            and shift_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and shift_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="productId != null">
+            and product_id = #{productId}
+        </if>
+        <if test="furnaceId != null">
+            and furnace_id = #{furnaceId}
+        </if>
+        <if test="enterpriseId != null">
+            and enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and factory_id = #{factoryId}
+        </if>
+        group by currentDate, product_spec_id
+    </select>
+
+    <!-- 根据月份查询各个矿热炉的产品数量 -->
+    <select id="getPassRateAmount" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ReportFormPassRateAmountDTO">
+        select b.furnace_id furnaceId, sum(ifnull(b.amount,0)) amount from pro_bagging b
+        where b.enterprise_id = #{enterpriseId} and b.factory_id = #{factoryId} and b.product_id = #{productId}
+        and DATE_FORMAT(b.modify_time, '%c') = #{month} and DATE_FORMAT(b.modify_time, '%Y') = #{year}
+        <if test="isQualified == 1">
+            and b.product_spec_id in
+            (select p.id from config_product_spec p where p.product_id = #{productId} and p.sort &lt;= #{sort} )
+        </if>
+        <if test="isQualified == 0">
+            and b.product_spec_id not in
+            (select p.id from config_product_spec p where p.product_id = #{productId} and p.sort &lt;= #{sort} )
+        </if>
+        group by b.furnace_id;
+    </select>
+
+    <select id="findTotalProduction" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnaceProductionDetailDTO">
+        select sum(amount) amount
+        from pro_bagging
+        where status = 1
+        <if test="startTime != null">
+            and shift_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and shift_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="productId != null">
+            and product_id = #{productId}
+        </if>
+        <if test="enterpriseId != null">
+            and enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and factory_id = #{factoryId}
+        </if>
+    </select>
+
+    <!-- 根据炉次查询产量信息 -->
+    <select id="getFurnaceBatchAmount"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ReportFormYieldAnalysisDTO">
+        select b.sample_code sampleCode,b.product_id productId,b.product_name productName,b.furnace_id furnaceId,
+            b.furnace_name furnaceName,b.shift_code shiftCode,b.shift,b.furnace_batch furnaceBatch,
+            b.furnace_batch_code furnaceBatchCode,b.product_spec_name productSpecName,
+            DATE_FORMAT(b.shift_time,'%Y年%m月%d日') shiftTime,sum(amount) totalAmount
+        from pro_bagging b
+        where b.status = '1' and b.enterprise_id = #{enterpriseId} and b.factory_id = #{factoryId}
+        and b.product_id = #{productId}
+        <if test="startTime != null">
+            and b.shift_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and b.shift_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="furnaceId != null">
+            and b.furnace_id = #{furnaceId}
+        </if>
+        <if test="shiftCode != null">
+            and b.shift_code = #{shiftCode}
+        </if>
+        group by b.sample_code,b.product_id,b.product_name,b.furnace_id,b.furnace_name,b.shift_code,b.shift,
+        b.furnace_batch,b.furnace_batch_code,b.product_spec_name,DATE_FORMAT(b.shift_time,'%Y年%m月%d日')
+        order by shiftTime
+        <if test="sort != null">
+            #{sort}
+        </if>
+    </select>
+
+    <select id="getOutputAmountBySpecsAndShift" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ReportFormAmountByShift">
+        SELECT
+        product_spec_id,
+        SUM(CASE WHEN shift_code = '1' THEN amount ELSE 0 END) AS shift_one,
+        SUM(CASE WHEN shift_code = '2' THEN amount ELSE 0 END) AS shift_two,
+        SUM(CASE WHEN shift_code = '3' THEN amount ELSE 0 END) AS shift_three
+        FROM
+        pro_bagging AS pb
+        WHERE
+        1 =1
+        AND pb.modify_time <![CDATA[<= ]]> #{endTime}
+        AND pb.modify_time <![CDATA[>= ]]> #{startTime}
+        AND pb.product_spec_id is not null
+        <if test="enterpriseId != null">
+            AND pb.enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            AND pb.factory_id = #{factoryId}
+        </if>
+        <if test="productId != null and productId != ''">
+            AND pb.product_id = #{productId}
+        </if>
+        <if test="furnaceId != null">
+            AND pb.furnace_id = #{furnaceId}
+        </if>
+        <if test="status != null and status != ''">
+            AND pb.status = #{status}
+        </if>
+        GROUP BY
+        product_spec_id
+        ORDER BY
+        create_time DESC
+    </select>
+
+    <!-- 统计各炉号的产品数量-->
+    <select id="findFurnaceProduction" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnaceProductionDetailDTO">
+        select furnace_id, furnace_name, sum(amount) amount
+        from pro_bagging
+        where status = 1
+        <if test="startTime != null">
+            and shift_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and shift_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="productId != null">
+            and product_id = #{productId}
+        </if>
+        <if test="enterpriseId != null">
+            and enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and factory_id = #{factoryId}
+        </if>
+        group by furnace_id
+    </select>
+
+    <select id="findCurrentProduction" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="java.math.BigDecimal">
+        select sum(amount) amount
+        from pro_bagging
+        where status = 1
+        <if test="timeRange != null and currentTime != null">
+            <if test="timeRange == 1">
+                and DATE_FORMAT(shift_time,'%Y-%m-%d') = #{currentTime}
+            </if>
+            <if test="timeRange == 4">
+                and DATE_FORMAT(shift_time,'%Y') = #{currentTime}
+            </if>
+        </if>
+        <if test="enterpriseId != null">
+            and enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and factory_id = #{factoryId}
+        </if>
+    </select>
+    <select id="getDataScreen" parameterType="map" resultType="decimal">
+        SELECT
+        SUM(a.amount)  AS amount
+        FROM
+        pro_bagging a
+        WHERE 1=1
+	    AND a.shift_time LIKE CONCAT(#{paramDate},'%')
+	    AND a.enterprise_id = #{enterpriseId}
+	    AND a.factory_id = #{factoryId}
+	    AND a.`status` = 1
+    </select>
+
+    <!-- 查询时间段内生产的产成品数量 -->
+    <select id="getCurrentTimeProductionAmount" parameterType="map" resultType="java.math.BigDecimal">
+        select ifnull(sum(amount),0) amount
+        from pro_bagging
+        where status = 1
+            and product_id = #{productId}
+            <if test="furnaceId != null and furnaceId != 0">
+                and furnace_id = #{furnaceId}
+            </if>
+            <if test="shiftCode != null">
+                and shift_code = #{shiftCode}
+            </if>
+            <if test="startTime != null">
+                and shift_time <![CDATA[>=]]> #{startTime}
+            </if>
+            <if test="endTime != null">
+                and shift_time <![CDATA[<=]]> #{endTime}
+            </if>
+    </select>
+
+    <select id="findFurnaceFinishProduction" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.BigScreenProductionDTO">
+        select furnace_id, furnace_name, sum(amount) production,
+        product_id, product_name, product_spec_id, product_spec_name
+        from pro_bagging
+        where status = 1
+        <if test="startTime!= null and startTime != ''">
+            and shift_time <![CDATA[>= ]]> #{startTime}
+        </if>
+        <if test="endTime!= null and endTime != ''">
+            and shift_time <![CDATA[<= ]]> #{endTime}
+        </if>
+        <if test="enterpriseId != null">
+            and enterprise_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and factory_id = #{factoryId}
+        </if>
+        group by furnace_id, product_id, product_spec_id
+    </select>
+
+</mapper>

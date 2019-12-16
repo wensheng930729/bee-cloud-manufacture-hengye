@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.BuyLogisticsBatchMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.BuyLogisticsBatch">
+        <id column="id" property="id" />
+        <result column="batch_id" property="batchId" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="batch_name" property="batchName" />
+        <result column="freight_volume" property="freightVolume" />
+        <result column="arrival_volume" property="arrivalVolume" />
+        <result column="batch_status" property="batchStatus" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, batch_id, contract_business_id, batch_name, freight_volume, arrival_volume, batch_status, status,
+        create_id, creator, create_time, modify_id, modifier, modify_time, remark
+    </sql>
+
+    <!-- 根据批次id查询最早出厂时间 -->
+    <select id="selectBatchDepartureTime" resultType="java.util.Date">
+        select min(ct.departure_time) from buy_transport_section ts
+          inner join buy_carrier_transport ct on ts.transport_section_id = ct.transport_section_id
+        where ts.status = '1' and ct.status = '1' and ts.batch_id = #{batchId}
+    </select>
+
+    <!-- 根据批次id查询最早称重时间 -->
+    <select id="selectBatchWeightTime" resultType="java.util.Date">
+      select min(wm.weighing_time) from buy_weight_machine wm
+      where wm.status = '1' and wm.batch_id = #{batchId}
+    </select>
+
+    <!-- 根据批次id查询到厂货运方式 -->
+    <select id="selectBatchTransportMode" resultType="java.lang.String">
+      select GROUP_CONCAT(t.transportMode) from (
+        select distinct ct.transport_mode transportMode from buy_transport_section ts
+          inner join buy_carrier_transport ct on ts.transport_section_id = ct.transport_section_id
+        where ts.status = '1' and ct.status = '1' and ct.to_factory = '1' and ts.batch_id = #{batchId}
+      ) t
+    </select>
+
+    <!-- 查询采购销售中已完成的合同信息 -->
+    <select id="getContractLogisticInfo" resultType="com.bee.platform.cloud.si.manufacture.dto.ContractLogisticInfoDTO">
+        select * from (
+          select bc.contract_business_id contractBusinessId,bc.contract_num contractNum,bc.product_name productName,
+            bc.supplier_name companyName, '1' as businessType,bc.enterprise_id enterpriseId
+          from buy_contract_basic bc where bc.completed = '1' and bc.status = '1'
+          union
+          select sc.contract_business_id contractBusinessId,sc.contract_num contractNum,sc.product_name productName,
+            sc.customer_name companyName, '2' as businessType,sc.enterprise_id enterpriseId
+          from sale_contract_basic sc where sc.completed = '1' and sc.status = '1'
+        ) t where t.enterpriseId = #{orgId}
+    </select>
+
+    <!-- 根据采购合同业务id查询最早出厂时间 -->
+    <select id="selectBuyContractDepartureTime" resultType="java.util.Date">
+        select min(ct.departure_time) from buy_transport_section ts
+          inner join buy_carrier_transport ct on ts.transport_section_id = ct.transport_section_id
+        where ts.status = '1' and ct.status = '1' and ct.contract_business_id = #{contractBusinessId}
+    </select>
+
+    <!-- 根据采购合同业务id查询到货时间 -->
+    <select id="selectBuyContractArrivalTime" resultType="java.util.Date">
+        select max(wm.weighing_time) from buy_weight_machine wm
+        where wm.status = '1' and wm.contract_business_id = #{contractBusinessId}
+    </select>
+
+    <!-- 根据销售合同业务id查询最早出厂时间 -->
+    <select id="selectSaleContractDepartureTime" resultType="java.util.Date">
+        select min(ct.departure_time) from sale_transport_section ts
+          inner join sale_carrier_transport ct on ts.transport_section_id = ct.transport_section_id
+        where ts.status = '1' and ct.status = '1' and ct.contract_business_id = #{contractBusinessId}
+    </select>
+
+    <!-- 根据销售合同业务id查询到货时间 -->
+    <select id="selectSaleContractArrivalTime" resultType="java.util.Date">
+        select max(d.modify_time) from sale_carrier_transport_detail d
+        where d.contract_business_id = #{contractBusinessId}
+          and d.arrival_status = '1' and d.status = '1'
+    </select>
+
+    <!-- 查询物流订单列表 -->
+    <select id="getAllLogisticsList" resultType="com.bee.platform.cloud.si.manufacture.dto.LogisticsContractListContentDTO">
+        select t.* from (
+            select b.contract_business_id contractBusinessId,b.contract_num contractNum,'1' as businessType,
+              '采购' as businessTypeName,b.product_name productName,b.quantity,b.unit_value unitValue,
+              b.origin_address originAddress,#{enterpriseName} as endAddress,b.create_time createTime
+            from buy_contract_basic b
+            where b.enterprise_id = #{enterpriseId} and b.factory_id = #{factoryId}
+                <if test="startTime != null">
+                    and b.create_time <![CDATA[>=]]> #{startTime}
+                </if>
+                <if test="endTime != null">
+                    and b.create_time <![CDATA[<=]]> #{endTime}
+                </if>
+                <if test="productId != null">
+                    and b.product_id = #{productId}
+                </if>
+                <if test="contractNum != null">
+                    and b.contract_num like CONCAT('%',#{contractNum},'%')
+                </if>
+            union
+            select s.contract_business_id contractBusinessId,s.contract_num contractNum,'2' as businessType,
+              '销售' as businessTypeName,s.product_name productName,s.quantity,s.unit_value unitValue,
+              #{enterpriseName} as originAddress,s.arrival_address as endAddress,s.create_time createTime
+            from sale_contract_basic s
+            where s.enterprise_id = #{enterpriseId} and s.factory_id = #{factoryId}
+                <if test="startTime != null">
+                    and s.create_time <![CDATA[>=]]> #{startTime}
+                </if>
+                <if test="endTime != null">
+                    and s.create_time <![CDATA[<=]]> #{endTime}
+                </if>
+                <if test="productId != null">
+                    and s.product_id = #{productId}
+                </if>
+                <if test="contractNum != null">
+                    and s.contract_num like CONCAT('%',#{contractNum},'%')
+                </if>
+        ) t where 1=1
+            <if test="businessType != null">
+                and t.businessType = #{businessType}
+            </if>
+        order by t.createTime desc
+    </select>
+
+</mapper>

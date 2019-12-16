@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.BuyWeightMachineMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.BuyWeightMachine">
+        <id column="id" property="id" />
+        <result column="enterprise_id" property="enterpriseId" />
+        <result column="factory_id" property="factoryId" />
+        <result column="machine_id" property="machineId" />
+        <result column="contract_business_id" property="contractBusinessId" />
+        <result column="contract_num" property="contractNum" />
+        <result column="batch_id" property="batchId" />
+        <result column="train_number" property="trainNumber" />
+        <result column="driver" property="driver" />
+        <result column="device_id" property="deviceId" />
+        <result column="carrier_name" property="carrierName" />
+        <result column="delivery_company" property="deliveryCompany" />
+        <result column="receiving_company" property="receivingCompany" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="cargo_weight" property="cargoWeight" />
+        <result column="weighing_time" property="weighingTime" />
+        <result column="in_factory_weight" property="inFactoryWeight" />
+        <result column="out_factory_weight" property="outFactoryWeight" />
+        <result column="in_factory_weight_by_manual" property="inFactoryWeightByManual" />
+        <result column="out_factory_weight_by_manual" property="outFactoryWeightByManual" />
+        <result column="in_factory_weight_is_confirm" property="inFactoryWeightIsConfirm" />
+        <result column="out_factory_weight_is_confirm" property="outFactoryWeightIsConfirm" />
+        <result column="net_weight" property="netWeight" />
+        <result column="arrival_time" property="arrivalTime" />
+        <result column="is_weight" property="isWeight" />
+        <result column="sample_status" property="sampleStatus" />
+        <result column="sample_push_status" property="samplePushStatus" />
+        <result column="sample_push_time" property="samplePushTime" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="quality_exam_status" property="qualityExamStatus" />
+        <result column="assay_result" property="assayResult" />
+        <result column="discount_unit_price" property="discountUnitPrice" />
+        <result column="status" property="status" />
+        <result column=" in_storage_confirm" property="inStorageConfirm" />
+        <result column=" handle_type" property="handleType" />
+        <result column="create_id" property="createId" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_id" property="modifyId" />
+        <result column="modifier" property="modifier" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="remark" property="remark" />
+        <result column="data_source" property="dataSource" />
+        <result column="carrier_id" property="carrierId" />
+        <result column="delivery_company_id" property="deliveryCompanyId" />
+        <result column="receiving_company_id" property="receivingCompanyId" />
+        <result column="deduct_weight" property="deductWeight" />
+        <result column="deduct_weight_by_manual" property="deductWeightByManual" />
+        <result column="weight_man" property="weightMan" />
+        <result column="settle_status" property="settleStatus"/>
+        <result column="settle_time" property="settleTime" />
+        <result column="contact" property="contact" />
+        <result column="bind_ignore" property="bindIgnore" />
+        <result column="car_deduct_weight" property="carDeductWeight" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, enterprise_id, factory_id, machine_id, contract_business_id, contract_num, batch_id,
+        train_number, driver, device_id, carrier_name,  delivery_company, receiving_company, product_id,
+        product_name, cargo_weight, weighing_time, in_factory_weight, out_factory_weight, in_factory_weight_by_manual,
+        out_factory_weight_by_manual, in_factory_weight_is_confirm,
+        out_factory_weight_is_confirm, net_weight, arrival_time,
+        is_weight, sample_status, sample_push_status,
+        sample_push_time, product_spec_id, product_spec_name,
+        quality_exam_status, assay_result,
+        discount_unit_price, status,  in_storage_confirm, handle_type, create_id,
+        creator, create_time, modify_id, modifier, modify_time, remark,data_source,
+        carrier_id,delivery_company_id,receiving_company_id,deduct_weight,deduct_weight_by_manual,
+        weight_man,settle_status,settle_time,contact,bind_ignore,car_deduct_weight
+    </sql>
+
+    <select id="getWeitghtIdByProductId" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.BuyWeightMachineBoxDTO">
+        SELECT
+        a.id,a.machine_id
+        FROM
+        buy_weight_machine a,
+        buy_contract_basic b
+        WHERE
+        a.contract_num = b.contract_num
+        and b.completed = 0
+        AND a.product_id = #{productId}
+        AND a.enterprise_id = #{enterpriseId}
+        <if test="factoryId!=null">
+            AND a.factory_id = #{factoryId}
+        </if>
+    </select>
+
+    <select id="getWeightMachineListTotal" parameterType="int"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.WeightMachineTotalDTO">
+        SELECT
+        contract_num AS contractNum,
+        SUM(net_weight) AS alreadyWeightAmount,
+        COUNT(1) AS alreadyWeightCars
+        FROM buy_weight_machine
+        WHERE is_weight = 1
+        AND enterprise_id = #{orgId}
+        AND status = 1
+        GROUP BY contract_num
+        ORDER BY create_time desc
+    </select>
+
+    <!-- 根据批次id查询批次到货数量 -->
+    <select id="getArrivalVolumeByBatchId" resultType="java.math.BigDecimal">
+        select sum(ifnull(w.cargo_weight,0)) from buy_weight_machine w
+        where w.status = '1' and w.arrival_time is not null
+          and w.is_weight = '1' and w.batch_id = #{batchId}
+    </select>
+
+    <!-- 根据合同id查询批次到货数量 -->
+    <select id="getArrivalVolumeByContractId" resultType="java.math.BigDecimal">
+        select sum(ifnull(w.cargo_weight,0)) from buy_weight_machine w
+        where w.status = '1' and w.arrival_time is not null
+          and w.is_weight = '1' and w.contract_business_id = #{contractBusinessId}
+    </select>
+
+    <!-- 查询过磅单数据信息 -->
+    <select id="getWeighListInfo" resultType="com.bee.platform.cloud.si.manufacture.dto.WeighingListDTO">
+        select t.* from (
+          select b.machine_id machineId,b.contract_num contractNum,bb.supplier_name merchants,b.train_number trainNumber,
+            b.product_name productName,b.carrier_name carrierName,b.in_factory_weight grossWeight,
+            b.out_factory_weight tareWeight,b.net_weight netWeight,b.weight_man weighingMan,
+            b.weighing_time weighingTime,1 as weighingType,b.enterprise_id enterpriseId,b.deduct_weight deductWeight
+          from buy_weight_machine b left join buy_contract_basic bb on b.contract_business_id = bb.contract_business_id
+            and bb.status = '1'
+          where b.status = '1' and b.is_weight = '1'
+          union
+          select s.machine_id machineId,s.contract_num contractNum,sb.customer_name merchants,s.train_number trainNumber,
+            s.product_name productName,s.carrier_name carrierName,s.out_factory_weight grossWeight,
+            s.in_factory_weight tareWeight,s.net_weight netWeight,s.weight_man weighingMan,
+            s.weighing_time weighingTime,2 as weighingType,s.enterprise_id enterpriseId,s.deduct_weight deductWeight
+          from sale_weight_machine s left join sale_contract_basic sb on s.contract_business_id = sb.contract_business_id
+            and sb.status = '1'
+          where s.status = '1' and s.is_weight = '1'
+        ) t
+        where 1=1
+          and t.enterpriseId = #{orgId}
+          <if test="startTime != null">
+            and t.weighingTime <![CDATA[>=]]> #{startTime}
+          </if>
+          <if test="endTime != null">
+            and t.weighingTime <![CDATA[<=]]> #{endTime}
+          </if>
+          <if test="weighingType != null">
+            and t.weighingType = #{weighingType}
+          </if>
+          <if test="contractNum != null">
+            and t.contractNum like CONCAT('%',#{contractNum},'%')
+          </if>
+          <if test="trainNumber != null">
+            and t.trainNumber like CONCAT('%',#{trainNumber},'%')
+          </if>
+        order by t.weighingTime desc
+    </select>
+
+    <select id="getWeightMachineWebBindList" resultType="com.bee.platform.cloud.si.manufacture.dto.WeightMachineWebBindDTO"
+            parameterType="map">
+        select * from (( select
+        1 AS type,
+        a.machine_id AS machineId,
+        a.enterprise_id AS enterpriseId,
+        a.factory_id AS factoryId,
+        a.train_number AS trainNumber,
+        a.carrier_name AS carrierName,
+        a.delivery_company AS custOrSupName,
+        a.product_name AS productName,
+        a.net_weight AS netWeight,
+        a.weight_man AS weightMan,
+        a.weighing_time AS weighingTime
+        from buy_weight_machine a
+        where 1= 1
+        and a.enterprise_id = #{enterpriseId}
+        <![CDATA[  and (a.contract_num is null || LENGTH(trim(a.contract_num)) < 1 ) ]]>
+        and a.status = 1
+        and a.bind_ignore = #{isIgnore}
+        <if test="custOrSupName!=null">
+            and a.delivery_company like CONCAT('%',#{custOrSupName},'%')
+        </if>
+        <if test="startTime != null">
+            and a.weighing_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and a.weighing_time <![CDATA[<=]]> #{endTime}
+        </if>
+        )
+        union all
+        ( select
+        2 AS type,
+        b.machine_id AS machineId,
+        b.enterprise_id AS enterpriseId,
+        b.factory_id AS factoryId,
+        b.train_number AS trainNumber,
+        b.carrier_name AS carrierName,
+        b.receiving_company AS custOrSupName,
+        b.product_name AS productName,
+        b.net_weight AS netWeight,
+        b.weight_man AS weightMan,
+        b.weighing_time AS weighingTime
+        from sale_weight_machine b
+        where 1= 1
+        and b.enterprise_id = #{enterpriseId}
+        <![CDATA[  and (b.contract_num is null || LENGTH(trim(b.contract_num)) < 1 ) ]]>
+        and b.status = 1
+        and b.bind_ignore = #{isIgnore}
+        <if test="custOrSupName!=null">
+            and b.receiving_company like CONCAT('%',#{custOrSupName},'%')
+        </if>
+        <if test="startTime != null">
+            and b.weighing_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and b.weighing_time <![CDATA[<=]]> #{endTime}
+        </if>
+        )) as tmp order by tmp.weighingTime desc
+    </select>
+
+    <update id="batchBindContract" parameterType="java.util.List">
+        <foreach collection="list" separator=";" item="item">
+            update buy_weight_machine
+            set
+            contract_business_id = #{item.contractBusinessId},
+            contract_num = #{item.contractNum},
+            batch_id = #{item.batchId},
+            modify_id = #{item.userId},
+            modifier = #{item.userName},
+            modify_time = SYSDATE()
+            where machine_id = #{item.machineId}
+        </foreach>
+    </update>
+
+</mapper>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.ProBlankingDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.ProBlankingDetail">
+        <id column="id" property="id" />
+        <result column="blanking_id" property="blankingId" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_spec_id" property="productSpecId" />
+        <result column="product_spec_name" property="productSpecName" />
+        <result column="num" property="num" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="status" property="status" />
+        <result column="type" property="type" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, blanking_id, product_id, product_name, product_spec_id, product_spec_name, num, create_time, modify_time, status, type
+    </sql>
+
+    <select id="findMaterialConsume" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnaceProductionDetailDTO">
+        select pb.furnace_id, pb.furnace_name, sum(IFNULL(pbd.num, 0)) amount,
+        <if test="timeRange != null">
+            <if test="timeRange == 1 or timeRange == 2">
+                DATE_FORMAT(pb.blanking_time,'%Y-%m-%d') currentDate,
+            </if>
+            <if test="timeRange == 3">
+                DATE_FORMAT(pb.blanking_time,'%Y-%m') currentDate,
+            </if>
+            <if test="timeRange == 4">
+                pb.blanking_time currentDate,
+            </if>
+        </if>
+        pbd.product_id, pbd.product_name, pbd.product_spec_id, pbd.product_spec_name
+        from pro_blanking pb
+        left join pro_blanking_detail pbd on pbd.blanking_id = pb.id and pbd.status = 1
+        where pb.status = 1
+        <if test="startTime != null">
+            and pb.blanking_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and pb.blanking_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="productId != null">
+            and pb.finish_product_id = #{productId}
+        </if>
+        <if test="furnaceId != null">
+            and pb.furnace_id = #{furnaceId}
+        </if>
+        <if test="enterpriseId != null">
+            and pb.company_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and pb.factory_id = #{factoryId}
+        </if>
+        group by currentDate, pb.furnace_id
+    </select>
+
+    <select id="findMaterialMainOrAuxiliary" parameterType="com.bee.platform.cloud.si.manufacture.rq.ProStatisticRQ"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnaceProductionDetailDTO">
+        select sum(IFNULL(pbd.num, 0)) amount,
+        pbd.product_id, pbd.product_name, pbd.product_spec_id, pbd.product_spec_name
+        from pro_blanking pb
+        left join pro_blanking_detail pbd on pbd.blanking_id = pb.id and pbd.status = 1
+        where pb.status = 1
+        <if test="startTime != null">
+            and pb.blanking_time <![CDATA[>=]]> #{startTime}
+        </if>
+        <if test="endTime != null">
+            and pb.blanking_time <![CDATA[<=]]> #{endTime}
+        </if>
+        <if test="productId != null">
+            and pb.finish_product_id = #{productId}
+        </if>
+        <if test="materialType != null">
+            and pbd.type = #{materialType}
+        </if>
+        <if test="enterpriseId != null">
+            and pb.company_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and pb.factory_id = #{factoryId}
+        </if>
+        group by pbd.product_id, pbd.product_spec_id
+    </select>
+
+    <!-- 分班次查询产成品各原料消耗 -->
+    <select id="getConsumptionAnalysisAmount" resultType="com.bee.platform.cloud.si.manufacture.dto.ReportFormConsumptionAnalysisAmountDTO">
+        SELECT t.productId,t.productName,
+            SUM(IF(`shift`='1',t.amount,0)) as 'consume1',
+            SUM(IF(`shift`='2',t.amount,0)) as 'consume2',
+            SUM(IF(`shift`='3',t.amount,0)) as 'consume3'
+        FROM (
+            select m.shift,m.productId,m.productName,sum(m.amount) amount from (
+                select b.shift,d.product_id productId,d.product_name productName,sum(d.num) amount from pro_blanking b
+                  inner join pro_blanking_detail d on b.id = d.blanking_id
+                where b.status = '1' and d.status = '1'
+                  and b.finish_product_id = #{productId}
+                    <if test="startTime != null">
+                        and b.blanking_time <![CDATA[>=]]> #{startTime}
+                    </if>
+                    <if test="endTime != null">
+                        and b.blanking_time <![CDATA[<=]]> #{endTime}
+                    </if>
+                    <if test="furnaceId != null and furnaceId != 0">
+                        and b.furnace_id = #{furnaceId}
+                    </if>
+                    <if test="stockProductId != null">
+                        and d.product_id = #{stockProductId}
+                    </if>
+                group by b.shift,d.product_id,d.product_name
+                union all
+                select a.shift,a.product_id productId,a.product_name productName,sum(a.num) amount from pro_artificial_feed a
+                where a.status = '1'
+                    and a.finish_product_id = #{productId}
+                    <if test="startTime != null">
+                        and a.blanking_time <![CDATA[>=]]> #{startTime}
+                    </if>
+                    <if test="endTime != null">
+                        and a.blanking_time <![CDATA[<=]]> #{endTime}
+                    </if>
+                    <if test="furnaceId != null and furnaceId != 0">
+                        and a.furnace_id = #{furnaceId}
+                    </if>
+                    <if test="stockProductId != null">
+                        and a.product_id = #{stockProductId}
+                    </if>
+                group by a.shift,a.product_id,a.product_name
+            ) m
+            group by m.shift,m.productId,m.productName
+        ) t
+        GROUP BY t.productId,t.productName
+    </select>
+
+    <!-- 查询指定时间内的原料消耗 -->
+    <select id="findCurrentMaterialConsume" parameterType="map"
+            resultType="com.bee.platform.cloud.si.manufacture.dto.ProFurnaceProductionDetailDTO">
+        select pb.furnace_id, pb.furnace_name, sum(IFNULL(pbd.num, 0)) amount,
+        pbd.product_id, pbd.product_name, pbd.product_spec_id, pbd.product_spec_name
+        from pro_blanking pb
+        left join pro_blanking_detail pbd on pbd.blanking_id = pb.id and pbd.status = 1
+        where pb.status = 1
+        <if test="startTime!= null and startTime != ''">
+            and pb.blanking_time <![CDATA[>= ]]> #{startTime}
+        </if>
+        <if test="endTime!= null and endTime != ''">
+            and pb.blanking_time <![CDATA[<= ]]> #{endTime}
+        </if>
+        <if test="enterpriseId != null">
+            and pb.company_id = #{enterpriseId}
+        </if>
+        <if test="factoryId != null">
+            and pb.factory_id = #{factoryId}
+        </if>
+        group by pb.furnace_id, pbd.product_id, pbd.product_spec_id
+    </select>
+
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.platform.cloud.si.manufacture.dao.mapper.BuyWeightMachineFileMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bee.platform.cloud.si.manufacture.entity.BuyWeightMachineFile">
+        <id column="id" property="id"/>
+        <result column="machine_id" property="machineId"/>
+        <result column="file_name" property="fileName"/>
+        <result column="file_url" property="fileUrl"/>
+        <result column="status" property="status"/>
+        <result column="create_id" property="createId"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_id" property="modifyId"/>
+        <result column="modifier" property="modifier"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, machine_id, file_name, file_url, status, create_id, creator, create_time, modify_id, modifier, modify_time, remark
+    </sql>
+
+    <insert id="batchSaveFile" parameterType="com.bee.platform.cloud.si.manufacture.entity.BuyWeightMachineFile">
+        insert into buy_weight_machine_file
+        (
+        machine_id,
+        file_name,
+        file_url,
+        status,
+        create_id,
+        creator,
+        create_time,
+        modify_id,
+        modifier,
+        modify_time
+        )
+        VALUES
+        <foreach item="item" collection="list" separator=",">
+            (
+            #{item.machineId,jdbcType=VARCHAR},
+            #{item.fileName,jdbcType=VARCHAR},
+            #{item.fileUrl,jdbcType=VARCHAR},
+            #{item.status,jdbcType=INTEGER},
+            #{item.createId,jdbcType=INTEGER},
+            #{item.creator,jdbcType=VARCHAR},
+            SYSDATE(),
+            #{item.createId,jdbcType=INTEGER},
+            #{item.creator,jdbcType=VARCHAR},
+            SYSDATE()
+            )
+        </foreach>
+
+    </insert>
+
+    <update id="clearWeightData">
+
+    truncate table weight_machine_data
+
+    </update>
+
+
+</mapper>
